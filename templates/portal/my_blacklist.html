@@ -1,0 +1,26 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Blocked Users</h1>
+</header>
+<div class="body-content">
+  <ul class="list-content-with-icon-and-text arrow-list">
+    {% for u in blocked_users %}
+    <li class="scroll">
+      <a href="/users/{{ u.user_id }}" class="scroll-focus icon-container" data-pjax="#body">
+        <img src="{{ u.get_mii_url }}" class="icon">
+      </a>
+      <a href="/users/{{ u.user_id }}" class="arrow-button scroll" data-pjax="#body"></a>
+      <div class="body">
+        <p class="title">
+          <span class="nick-name">{{ u.screen_name }}</span>
+          <span class="id-name">{{ u.user_id }}</span>
+        </p>
+      </div>
+    </li>
+    {% empty %}
+    <li><div class="no-content-window"><div class="window"><p>You have not blocked any users.</p></div></div></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

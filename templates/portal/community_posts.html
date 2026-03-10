@@ -1,0 +1,51 @@
+{% extends "portal/base.html" %}
+{% load grape_tags %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">{{ community.name }}</h1>
+  {% if me %}
+  <a id="header-post-button" class="header-button" href="#" data-modal-open="#add-post-page">Post</a>
+  {% endif %}
+</header>
+
+{% if me %}
+<!-- Post Form -->
+<div id="add-post-page" class="add-post-page none" data-modal-types="add-entry add-post require-body preview-body" data-is-template="1">
+  <header class="add-post-page-header">
+    <h1 class="page-title">Post to {{ community.name }}</h1>
+  </header>
+  <form method="post" action="/posts" class="posts-form">
+    {% csrf_token %}
+    <input type="hidden" name="community_id" value="{{ community.community_id }}">
+    <div class="add-post-page-content">
+      <div class="feeling-selector expression">
+        <img src="{{ me_mii.output }}" class="icon">
+        <ul class="buttons">
+          <li class="checked"><input type="radio" name="feeling_id" value="0" class="feeling-button-normal" data-mii-face-url="{{ me_mii.output }}" checked="" data-sound="SE_WAVE_MII_FACE_00"></li>
+          <li><input type="radio" name="feeling_id" value="1" class="feeling-button-happy" data-sound="SE_WAVE_MII_FACE_01"></li>
+          <li><input type="radio" name="feeling_id" value="2" class="feeling-button-like" data-sound="SE_WAVE_MII_FACE_02"></li>
+          <li><input type="radio" name="feeling_id" value="3" class="feeling-button-surprised" data-sound="SE_WAVE_MII_FACE_03"></li>
+          <li><input type="radio" name="feeling_id" value="4" class="feeling-button-frustrated" data-sound="SE_WAVE_MII_FACE_04"></li>
+          <li><input type="radio" name="feeling_id" value="5" class="feeling-button-puzzled" data-sound="SE_WAVE_MII_FACE_05"></li>
+        </ul>
+      </div>
+      <div class="textarea-container textarea-with-menu active-text">
+        <menu class="textarea-menu">
+          <li><label class="textarea-menu-text checked"><input type="radio" name="_post_type" value="body" checked="" data-sound=""></label></li>
+        </menu>
+        <textarea type="text" name="body" class="textarea-text" maxlength="1000" placeholder="Share your thoughts in a post to this community."></textarea>
+      </div>
+      <label class="spoiler-button checkbox-button">
+        Spoilers <input type="checkbox" name="is_spoiler" value="1">
+      </label>
+    </div>
+    <input type="button" class="olv-modal-close-button fixed-bottom-button left" value="Cancel" data-sound="SE_WAVE_CANCEL">
+    <input type="button" class="post-button fixed-bottom-button" value="Post" data-post-content-type="text">
+  </form>
+</div>
+{% endif %}
+
+<div class="body-content post-list js-post-list" id="community-post-list">
+  {% include "portal/partials/post_list.html" %}
+</div>
+{% endblock %}

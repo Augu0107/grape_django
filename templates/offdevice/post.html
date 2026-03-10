@@ -1,0 +1,126 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+  <!-- Post -->
+  <div id="post-{{ post.id }}" class="post{% if post.screenshot %} with-image{% endif %}{% if post.is_spoiler and not show_spoiler %} hidden{% endif %}">
+    <a href="/web/users/{{ user.user_id }}" class="icon-container{% if usermii.official %} official-user{% endif %}">
+      <img src="{{ usermii.output }}" class="icon">
+    </a>
+    <p class="timestamp-container">
+      {% if post.is_spoiler %}<span class="spoiler">Spoilers</span> ·{% endif %}
+      <a class="timestamp" href="/web/posts/{{ post.id }}">{{ human_time }}</a>
+    </p>
+    <p class="user-name"><a href="/web/users/{{ user.user_id }}">{{ user.screen_name }}</a></p>
+    <p class="community-container">
+      <a {% if community.type != 5 %}href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}"{% endif %}>
+        <img src="{{ community.get_icon }}" class="community-icon">{{ community.name }}
+      </a>
+    </p>
+
+    <div class="body">
+      <div class="post-content">
+        {% if post.is_hidden %}
+        <p class="deleted-message">Deleted by administrator.</p>
+        {% else %}
+        {% if post.post_type == "artwork" %}
+        <p class="post-content-memo"><img src="{{ post.body }}" class="post-memo"></p>
+        {% else %}
+        <p class="post-content-text">{{ post.body }}</p>
+        {% endif %}
+        {% if post.is_spoiler and not show_spoiler %}
+        <div class="hidden-content">
+          <p>This post contains spoilers.
+            <button type="button" class="hidden-content-button">View Post</button>
+          </p>
+        </div>
+        {% endif %}
+        {% if post.screenshot %}
+        <div class="screenshot-container still-image"><img src="{{ post.screenshot }}"></div>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="post-meta">
+        {% if me %}
+        <form method="post" action="/web/posts/{{ post.id }}/empathies" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit"{% if not can_yeah %} disabled{% endif %}
+            class="symbol submit empathy-button{% if my_empathy %} empathy-added{% endif %}{% if not can_yeah %} disabled{% endif %}">
+            <span class="empathy-button-text">{% if my_empathy %}{{ usermii.miitoo_delete }}{% else %}{{ usermii.miitoo }}{% endif %}</span>
+          </button>
+        </form>
+        {% endif %}
+        <div class="empathy symbol"><span class="symbol-label">Yeahs</span><span class="empathy-count">{{ empathy_count }}</span></div>
+        <div class="reply symbol"><span class="symbol-label">Comments</span><span class="reply-count">{{ replies_ctx|length }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reply form -->
+  {% if me %}
+  <form method="post" action="/web/posts/{{ post.id }}/replies" class="reply-form">
+    {% csrf_token %}
+    <div class="feeling-selector">
+      <label class="symbol feeling-button feeling-button-normal checked"><input type="radio" name="feeling_id" value="0" checked=""><span class="symbol-label">normal</span></label>
+      <label class="symbol feeling-button feeling-button-happy"><input type="radio" name="feeling_id" value="1"><span class="symbol-label">happy</span></label>
+    </div>
+    <textarea name="body" class="textarea" maxlength="1000" placeholder="Add a comment here." data-required=""></textarea>
+    <label class="spoiler-button symbol">
+      <input type="checkbox" name="is_spoiler" value="1"> Spoilers
+    </label>
+    <div class="form-buttons">
+      <input type="submit" class="black-button post-button" value="Send">
+    </div>
+  </form>
+  {% endif %}
+
+  <!-- Replies -->
+  <ul class="list reply-list">
+    {% for rc in replies_ctx %}
+    {% with reply=rc.reply r_user=rc.user mii=rc.mii %}
+    <li id="reply-{{ reply.id }}"
+      data-href{% if reply.is_spoiler and not rc.show_spoiler %}-hidden{% endif %}="/web/replies/{{ reply.id }}"
+      class="{% if post.pid == reply.pid %}my{% else %}other{% endif %}{% if reply.is_spoiler and not rc.show_spoiler %} hidden{% endif %}{% if mii.official %} official-user{% endif %} trigger">
+      <a href="/web/users/{{ r_user.user_id }}" class="icon-container{% if mii.official %} official-user{% endif %}">
+        <img src="{{ mii.output }}" class="icon">
+      </a>
+      <div class="body">
+        <div class="header">
+          <p class="user-name"><a href="/web/users/{{ r_user.user_id }}">{{ r_user.screen_name }}</a></p>
+          <p class="timestamp-container">
+            <span class="spoiler-status{% if reply.is_spoiler %} spoiler{% endif %}">Spoilers ·</span>
+            <a class="timestamp" href="/web/replies/{{ reply.id }}">{{ rc.human_time }}</a>
+          </p>
+        </div>
+        <p class="reply-content-text">{{ reply.body }}</p>
+        {% if reply.screenshot %}
+        <div class="screenshot-container still-image"><img src="{{ reply.screenshot }}"></div>
+        {% endif %}
+        {% if reply.is_spoiler and not rc.show_spoiler %}
+        <div class="hidden-content">
+          <p>This comment contains spoilers.</p>
+          <button type="button" class="hidden-content-button">View Comment</button>
+        </div>
+        {% endif %}
+        <div class="reply-meta">
+          {% if me %}
+          <form method="post" action="/web/replies/{{ reply.id }}/empathies" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit"{% if not rc.can_yeah %} disabled{% endif %}
+              class="symbol submit empathy-button{% if rc.my_empathy %} empathy-added{% endif %}{% if not rc.can_yeah %} disabled{% endif %} reply">
+              <span class="empathy-button-text">{% if rc.my_empathy %}{{ mii.miitoo_delete }}{% else %}{{ mii.miitoo }}{% endif %}</span>
+            </button>
+          </form>
+          {% endif %}
+          <div class="empathy symbol"><span class="symbol-label">Yeahs</span><span class="empathy-count">{{ rc.empathy_count }}</span></div>
+        </div>
+      </div>
+    </li>
+    {% endwith %}
+    {% empty %}
+    <li><div class="no-content"><div><p>No comments yet.</p></div></div></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

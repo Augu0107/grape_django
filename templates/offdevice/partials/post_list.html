@@ -1,0 +1,97 @@
+{% load grape_tags %}
+{% for pc in posts_ctx %}
+{% with post=pc.post user=pc.user usermii=pc.usermii community=pc.community %}
+<div id="post-{{ post.id }}"
+  data-href{% if post.is_spoiler and not pc.show_spoiler %}-hidden{% endif %}="/web/posts/{{ post.id }}"
+  class="post trigger{% if post.screenshot %} with-image{% endif %}{% if post.is_spoiler and not pc.show_spoiler %} hidden{% endif %}"
+  tabindex="0">
+
+  <a href="/web/users/{{ user.user_id }}" class="icon-container{% if usermii.official %} official-user{% endif %}">
+    <img src="{{ usermii.output }}" class="icon">
+  </a>
+
+  <p class="timestamp-container">
+    {% if post.is_spoiler %}<span class="spoiler">Spoilers</span> ·{% endif %}
+    <a class="timestamp" {% if post.is_spoiler %}data-href-hidden{% else %}href{% endif %}="/web/posts/{{ post.id }}">{{ pc.human_time }}</a>
+  </p>
+
+  <p class="user-name"><a href="/web/users/{{ user.user_id }}">{{ user.screen_name }}</a></p>
+
+  <p class="community-container">
+    <a {% if community.type != 5 %}href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}"{% endif %}>
+      <img src="{{ community.get_icon }}" class="community-icon">{{ community.name }}
+    </a>
+  </p>
+
+  <div class="body">
+    <div class="post-content">
+      {% if post.is_hidden and me and me.pid != post.pid %}
+      <p class="deleted-message">Deleted by administrator.</p>
+      {% else %}
+      {% if post.post_type == "artwork" %}
+      <p class="post-content-memo"><img src="{{ post.body }}" class="post-memo"></p>
+      {% else %}
+      <p class="post-content-text">{{ post.body|truncate_body:200 }}</p>
+      {% endif %}
+      {% if post.is_spoiler and not pc.show_spoiler %}
+      <div class="hidden-content">
+        <p>This post contains spoilers.
+          <button type="button" class="hidden-content-button">View Post</button>
+        </p>
+      </div>
+      {% endif %}
+      {% if post.screenshot %}
+      <a href="/web/posts/{{ post.id }}" class="screenshot-container still-image">
+        <img src="{{ post.screenshot }}">
+      </a>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <div class="post-meta">
+      {% if me %}
+      <form method="post" action="/web/posts/{{ post.id }}/empathies" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit"{% if not pc.can_yeah %} disabled{% endif %}
+          class="symbol submit empathy-button{% if pc.my_empathy %} empathy-added{% endif %}{% if not pc.can_yeah %} disabled{% endif %}"
+          data-feeling="{{ usermii.feeling }}"
+          data-action="/web/posts/{{ post.id }}/empathies">
+          <span class="empathy-button-text">{% if pc.my_empathy %}{{ usermii.miitoo_delete }}{% else %}{{ usermii.miitoo }}{% endif %}</span>
+        </button>
+      </form>
+      {% endif %}
+      <div class="empathy symbol"><span class="symbol-label">Yeahs</span><span class="empathy-count">{{ pc.empathy_count }}</span></div>
+      <div class="reply symbol"><span class="symbol-label">Comment</span><span class="reply-count">{{ pc.reply_count }}</span></div>
+    </div>
+  </div>
+
+  {% if pc.recent_reply %}
+  {% with rr=pc.recent_reply %}
+  <div class="recent-reply-content">
+    {% if rr.total_count >= 2 %}
+    <div class="recent-reply-read-more-container" data-href="/web/posts/{{ post.id }}" tabindex="0">
+      View {% if rr.total_count >= 3 %}More Comments{% else %}Other Comment{% endif %} ({{ rr.total_count|add:"-1" }})
+    </div>
+    {% endif %}
+    <div id="recent-reply-{{ rr.reply.id }}" data-href="/web/posts/{{ post.id }}" tabindex="0" class="recent-reply trigger">
+      <a href="/web/users/{{ rr.user.user_id }}" class="icon-container{% if rr.mii.official %} official-user{% endif %}">
+        <img src="{{ rr.mii.output }}" class="icon">
+      </a>
+      <p class="timestamp-container">
+        <a class="timestamp" href="/web/posts/{{ post.id }}">{{ rr.human_time }}</a>
+      </p>
+      <p class="user-name"><a href="/web/users/{{ rr.user.user_id }}">{{ rr.user.screen_name }}</a></p>
+      <div class="body">
+        <div class="post-content">
+          <p class="recent-reply-content-text">{{ rr.reply.body|truncate_body:200 }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+  {% endif %}
+</div>
+{% endwith %}
+{% empty %}
+<div class="no-content"><div><p>No posts yet.</p></div></div>
+{% endfor %}

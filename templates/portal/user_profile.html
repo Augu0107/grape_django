@@ -1,0 +1,105 @@
+{% extends "portal/base.html" %}
+{% load grape_tags %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">{{ profile_user.screen_name }}'s Profile</h1>
+  {% if is_me %}
+  <a id="header-mymenu-button" href="/my_menu" data-pjax="#body">User Menu</a>
+  {% endif %}
+</header>
+
+<div class="body-content user-page">
+  <div class="user-info info-content{% if usermii.official %} official-user{% endif %}">
+
+    {% if favorite_post and favorite_post.screenshot %}
+    <a href="/posts/{{ favorite_post.id }}" data-pjax="#body" class="user-profile-memo-container">
+      <img src="{{ favorite_post.screenshot }}" class="user-profile-memo">
+    </a>
+    {% else %}
+    <div class="user-profile-memo-container no-profile-memo">
+      {% if is_me %}Your favorite post can be displayed here.{% endif %}
+    </div>
+    {% endif %}
+
+    <span class="icon-container{% if usermii.official %} official-user{% endif %}">
+      <a href="/users/{{ profile_user.user_id }}"><img src="{{ usermii.output }}" class="icon"></a>
+    </span>
+
+    {% if usermii.official %}
+    <p class="user-organization">{{ profile_user.organization }}</p>
+    {% endif %}
+
+    <p class="title">
+      <span class="nick-name">{{ profile_user.screen_name }}</span>
+      <span class="id-name">{{ profile_user.user_id }}</span>
+    </p>
+
+    {% if is_me %}
+    <a href="/settings/profile" data-pjax="#body" class="button edit-button">Profile Settings</a>
+    {% elif me %}
+    <div class="toggle-button">
+      <a class="follow-button button add-button{% if relationship == 'following' %} none{% endif %} relationship-button"
+         href="#" data-action="/users/{{ profile_user.user_id }}.follow.json"
+         data-sound="SE_WAVE_FRIEND_ADD"
+         data-track-action="follow" data-track-category="follow">Follow</a>
+      <a href="#" class="unfollow-button button remove-button{% if relationship != 'following' %} none{% endif %} relationship-button"
+         data-modal-open="#unfollow-confirm-page"
+         data-user-id="{{ profile_user.user_id }}"
+         data-screen-name="{{ profile_user.screen_name }}"
+         data-mii-face-url="{{ usermii.output }}"
+         data-action="/users/{{ profile_user.user_id }}.unfollow.json"
+         data-track-action="openUnfollowModal" data-track-category="follow">Follow</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- User nav tabs -->
+  <menu class="user-menu tab-header">
+    <li class="tab-button-profile{% if page == 'posts' %} selected{% endif %}">
+      <a href="/users/{{ profile_user.user_id }}/posts" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB">
+        <span class="label">Posts</span><span class="number">{{ num_posts }}</span>
+      </a>
+    </li>
+    <li class="tab-button-activity{% if page == 'friends' %} selected{% endif %}">
+      <a href="/users/{{ profile_user.user_id }}/friends" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB">
+        <span class="label">Friends</span>
+        <span class="number">{% if can_view %}{{ num_friends }}{% else %}-{% endif %} / 100</span>
+      </a>
+    </li>
+    <li class="tab-button-activity{% if page == 'following' %} selected{% endif %}">
+      <a href="/users/{{ profile_user.user_id }}/following" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB">
+        <span class="label">Following</span>
+        <span class="number">{% if can_view %}{{ num_following }}{% else %}-{% endif %} / 1000</span>
+      </a>
+    </li>
+    <li class="tab-button-relationship{% if page == 'followers' %} selected{% endif %}">
+      <a href="/users/{{ profile_user.user_id }}/followers" data-pjax="#body" data-sound="SE_WAVE_SELECT_TAB">
+        <span class="label">Followers</span>
+        <span class="number">{% if can_view %}{{ num_followers }}{% else %}-{% endif %}</span>
+      </a>
+    </li>
+  </menu>
+
+  <div class="body-content profile-comment">
+    <p>{{ profile.comment|default:"" }}</p>
+  </div>
+
+  <!-- Unfollow confirm dialog -->
+  <div id="unfollow-confirm-page" class="unfollow-confirm-page window-page none" data-modal-types="confirm-relationship confirm-unfollow" data-is-template="1">
+    <div class="window user-window">
+      <h1 class="window-title">Unfollow</h1>
+      <div class="window-body"><div class="window-body-inner">
+        <div class="user-container">
+          <span class="icon-container"><img src="" class="icon"></span>
+          <p class="nickname"><span class="screen-name"></span><span class="id-name"></span></p>
+        </div>
+        <div class="message"><p>Stop following this user?</p></div>
+      </div></div>
+      <div class="window-bottom-buttons">
+        <input type="button" class="cancel-button button" value="Back" data-sound="SE_WAVE_CANCEL">
+        <input type="button" class="post-button button" value="Yes">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+  <h2 class="headline">Activity Feed</h2>
+  <div class="post-list">
+    {% include "offdevice/partials/post_list.html" %}
+  </div>
+</div>
+{% endblock %}

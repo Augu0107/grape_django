@@ -1,0 +1,73 @@
+{% load grape_tags %}<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html">
+    <meta charset="utf-8">
+    <title>{% block title %}{{ pagetitle|default:"Grape" }}{% endblock %}</title>
+    <meta http-equiv="content-style-type" content="text/css">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="/css/offdevice-old.css">
+    <script src="/js/offdevice/complete-old.js"></script>
+    <style type="text/css">* {}</style>
+    <style type="text/css">* {}</style>
+    <style type="text/css">* {}</style>
+  </head>
+  <body {% if me %}data-token="" data-hashed-pid="{{ me_pid_hash }}" data-user-id="{{ me.user_id }}" data-game-skill="0" data-follow-done="1" data-post-done="1" data-enable-user-recommendation="1"{% else %}class="guest-top guest" data-token=""{% endif %}>
+
+    <div id="wrapper">
+
+      {% block menu %}
+      <div id="sub-body">
+        {# mode='old': id="" when guest, id="global-menu" when logged in #}
+        <menu{% if me %} id="global-menu"{% endif %}>
+          <li id="global-menu-logo">
+            {# mode='old': logo is NOT a link, and is 200x55 #}
+            <h1><img src="/img/menu-logo.png" alt="Miiverse" width="200" height="55"></h1>
+          </li>
+          {% if me %}
+          {# mode='old': NO wrapper <li id="global-menu-list"><ul> — li are direct children #}
+          <li id="global-menu-mymenu"{% if mnselect == 'users' %} class="selected"{% endif %}>
+            <a href="/web/users/{{ me.user_id }}">
+              <span class="icon-container{% if me_mii.official %} official-user{% endif %}">
+                <img src="{{ me_mii.output }}" alt="My Page">
+              </span>
+              <span>My Page</span>
+            </a>
+          </li>
+          <li id="global-menu-feed"{% if mnselect == 'feed' %} class="selected"{% endif %}>
+            <a href="/web/activity" class="symbol"><span>Activity</span></a>
+          </li>
+          <li id="global-menu-community"{% if mnselect == 'community' %} class="selected"{% endif %}>
+            <a href="/web/" class="symbol"><span>Community</span></a>
+          </li>
+          {# mode='old': news has <span>News</span> label + badge, NO dropdown my-menu #}
+          <li id="global-menu-news"{% if mnselect == 'news' %} class="selected"{% endif %}>
+            <a href="/web/news/my_news" class="symbol">
+              <span>News</span>
+              <span class="badge" style="display: none;">0</span>
+            </a>
+          </li>
+          {% else %}
+          <li id="global-menu-login">
+            <form id="login_form" action="/web/act/login" method="get">
+              <input type="hidden" name="location" value="{{ request.path }}">
+              <input type="submit" class="black-button" value="Sign in">
+            </form>
+          </li>
+          {% endif %}
+        </menu>
+      </div>
+      {% endblock %}
+
+      {% block content %}{% endblock %}
+
+      <div id="footer">
+        <div id="sidebar"></div>
+        <p id="copyright">grape</p>
+      </div>
+
+    </div>
+
+  </body>
+</html>

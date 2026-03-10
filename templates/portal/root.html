@@ -1,0 +1,25 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Activity Feed</h1>
+  {% if me %}
+  <a id="header-post-button" class="header-button" href="#" data-modal-open="#add-post-page">Post</a>
+  {% endif %}
+</header>
+
+<div class="body-content post-list js-post-list" id="activity-feed">
+  <div class="no-content-window content-loading-window">
+    <div class="window">
+      <p>Loading activity feed...</p>
+    </div>
+  </div>
+  <div class="no-content-window content-load-error-window none">
+    <div class="window">
+      <p>The activity feed could not be loaded. Check your Internet connection.</p>
+      <div class="window-bottom-buttons single-button">
+        <a href="/" class="button" data-pjax="#body" data-pjax-replace="1">Reload</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

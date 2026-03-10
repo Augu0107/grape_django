@@ -1,0 +1,14 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Guest Menu</h1>
+</header>
+
+<div class="body-content" id="my-menu">
+  <div>
+    <a href="/act/create" class="scroll big-button">Create Account</a>
+    <a href="/act/login" class="scroll big-button">Log In</a>
+    <a href="/rules" data-pjax="#body" class="scroll big-button">Rules &amp; Guidelines</a>
+  </div>
+</div>
+{% endblock %}

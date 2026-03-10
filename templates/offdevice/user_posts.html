@@ -1,0 +1,22 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+  <div id="user-content" class="{% if usermii.official %}official-user{% endif %}">
+    <span class="icon-container{% if usermii.official %} official-user{% endif %}">
+      <img src="{{ usermii.output }}" class="icon">
+    </span>
+    <div class="nick-name">{{ profile_user.screen_name }}<span class="id-name">{{ profile_user.user_id }}</span></div>
+    <a href="/web/users/{{ profile_user.user_id }}" class="profile-page-button button">To Top</a>
+  </div>
+
+  <div class="tab2 user-menu-activity">
+    <a href="/web/users/{{ profile_user.user_id }}/posts" class="selected"><span class="label">Posts</span><span class="number">{{ num_posts }}</span></a>
+    <a href="/web/users/{{ profile_user.user_id }}/empathies"><span class="label">Yeahs</span><span class="number">{{ num_empathies }}</span></a>
+  </div>
+
+  <div class="post-list">
+    {% include "offdevice/partials/post_list.html" %}
+  </div>
+</div>
+{% endblock %}

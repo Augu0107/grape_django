@@ -1,0 +1,84 @@
+{% extends "offdevice/base.html" %}
+{% block content %}
+<div id="main-body">
+  <div class="body-content" id="community-top">
+
+    <div class="headline">
+      <h2 class="headline-text">Communities</h2>
+      <form method="GET" action="/web/titles/search" class="search">
+        <input type="text" name="query" placeholder="Search for a title" minlength="2" maxlength="20">
+        <input type="submit" value="q" title="Search">
+      </form>
+    </div>
+
+    {% if me and fav_communities %}
+    <h3 class="label">My Favorites</h3>
+    <ul class="list community-list">
+      {% for community in fav_communities %}
+      <li id="community-{{ community.olive_community_id }}" class="trigger" data-href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" tabindex="0">
+        <span class="icon-container"><img src="{{ community.get_icon }}" class="icon"></span>
+        <div class="body">
+          <a class="title" href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" tabindex="-1">{{ community.name }}</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="buttons-content">
+      <a href="/web/communities/favorites" class="button">Show More</a>
+    </div>
+    {% endif %}
+
+    <div id="identified-user-banner">
+      <a href="/web/identified_user_posts" class="list-button us">
+        <span class="title">Verified User Posts</span>
+        <span class="text">View posts from verified users</span>
+      </a>
+    </div>
+
+    <div id="tab-wiiu-body" class="tab-body">
+      <h3 class="label label-wiiu">Popular Communities</h3>
+      <ul class="list community-list community-title-list">
+        {% for title in wiiu_titles %}
+        {% with community=title.first_community %}
+        {% if community %}
+        <li id="community-{{ community.olive_community_id }}" class="trigger" data-href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" tabindex="0">
+          <span class="icon-container"><img src="{{ community.get_icon }}" class="icon"></span>
+          <div class="body">
+            <a class="title" href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" tabindex="-1">{{ community.name }}</a>
+            {% if title.platform_id %}
+            <span class="platform-tag"><img src="/img/platform-tag-{% if title.platform_id == 1 %}wiiu{% else %}3ds{% endif %}.png"></span>
+            {% endif %}
+          </div>
+        </li>
+        {% endif %}
+        {% endwith %}
+        {% empty %}
+        <li><p>No communities yet.</p></li>
+        {% endfor %}
+      </ul>
+      <div class="buttons-content">
+        <a href="/web/communities/categories/wiiu_all" class="button">Show More</a>
+      </div>
+    </div>
+
+    <h3 class="label">Special Communities</h3>
+    <ul class="list community-list community-title-list">
+      {% for title in special_titles %}
+      {% with community=title.first_community %}
+      {% if community %}
+      <li id="community-{{ community.olive_community_id }}" class="trigger" data-href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" tabindex="0">
+        <span class="icon-container"><img src="{{ community.get_icon }}" class="icon"></span>
+        <div class="body">
+          <a class="title" href="/web/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" tabindex="-1">{{ community.name }}</a>
+        </div>
+      </li>
+      {% endif %}
+      {% endwith %}
+      {% empty %}
+      <li><p>No special communities yet.</p></li>
+      {% endfor %}
+    </ul>
+
+  </div>
+</div>
+{% endblock %}

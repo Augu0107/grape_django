@@ -1,0 +1,35 @@
+{% extends "portal/base.html" %}
+{% load grape_tags %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">{{ profile_user.screen_name }}'s Posts</h1>
+</header>
+
+<div class="body-content user-page">
+  <div class="user-info info-content{% if usermii.official %} official-user{% endif %}">
+    <span class="icon-container"><img src="{{ usermii.output }}" class="icon"></span>
+    <p class="title">
+      <span class="nick-name">{{ profile_user.screen_name }}</span>
+      <span class="id-name">{{ profile_user.user_id }}</span>
+    </p>
+    <a href="/users/{{ profile_user.user_id }}" data-pjax="#body" class="button profile-back-button">To Top</a>
+  </div>
+
+  <menu class="user-menu-activity tab-header">
+    <li id="tab-header-user-posts" class="tab-button selected">
+      <a href="/users/{{ profile_user.user_id }}/posts" data-pjax=".tab-body" data-sound="SE_WAVE_SELECT_TAB">
+        <span class="label">Posts</span><span class="number">{{ num_posts }}</span>
+      </a>
+    </li>
+    <li id="tab-header-user-empathies" class="tab-button">
+      <a href="/users/{{ profile_user.user_id }}/empathies" data-pjax=".tab-body" data-sound="SE_WAVE_SELECT_TAB">
+        <span class="label">Yeahs</span><span class="number">{{ empathies_count }}</span>
+      </a>
+    </li>
+  </menu>
+
+  <div class="tab-body body-content post-list js-post-list">
+    {% include "portal/partials/post_list.html" %}
+  </div>
+</div>
+{% endblock %}

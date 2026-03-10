@@ -1,0 +1,219 @@
+{% extends "portal/base.html" %}
+{% load grape_tags %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">{{ user.screen_name }}'s Post</h1>
+</header>
+
+<div class="body-content post-permalink">
+  <!-- Post -->
+  <div id="post-{{ post.id }}" class="post scroll post-subtype-default{% if post.is_spoiler and not show_spoiler %} hidden{% endif %}{% if post.screenshot %} with-image{% endif %}" data-post-permalink-url="/posts/{{ post.id }}">
+    <a href="/users/{{ user.user_id }}" class="user-icon-container scroll-focus{% if usermii.official %} official-user{% endif %}" data-pjax="#body">
+      <img src="{{ usermii.output }}" class="user-icon">
+    </a>
+    <div class="post-body-content">
+      <div class="post-body">
+        <header>
+          <span class="user-name">{{ user.screen_name }}</span>
+          <span class="timestamp">{{ human_time }}</span>
+          <span class="spoiler-status{% if post.is_spoiler %} spoiler{% endif %}">Spoilers</span>
+        </header>
+
+        <a href="/titles/{{ community.olive_title_id }}/{{ community.olive_community_id }}" class="community-content" data-pjax="#body">
+          <span class="title-icon-container"><img src="{{ community.get_icon }}" class="title-icon"></span>
+          <span class="community-name">{{ community.name }}</span>
+        </a>
+
+        {% if post.screenshot %}
+        <a href="#" role="button" class="title-capture-container capture-container" data-modal-open="#capture-page" data-large-capture-url="{{ post.screenshot }}">
+          <img src="{{ post.screenshot }}" class="title-capture">
+        </a>
+        {% endif %}
+
+        <div class="post-content">
+          {% if post.is_hidden %}
+          <p class="deleted-message">Deleted by administrator.</p>
+          <p class="deleted-message">Post ID: {{ post_id_encoded }}</p>
+          {% else %}
+          {% if post.post_type == "artwork" %}
+          <p class="post-content-memo"><img src="{{ post.body }}" class="post-memo"></p>
+          {% else %}
+          <p class="post-content-text">{{ post.body }}</p>
+          {% endif %}
+          {% if post.is_spoiler and not show_spoiler %}
+          <div class="hidden-content">
+            <p>This post contains spoilers.</p>
+            <div><a href="#" class="hidden-content-button">View Post</a></div>
+          </div>
+          {% endif %}
+          {% endif %}
+        </div>
+
+        <div class="post-meta">
+          {% if me %}
+          <button type="button"{% if not can_yeah %} disabled{% endif %}
+            class="submit miitoo-button{% if my_empathy %} empathy-added{% endif %}{% if not can_yeah %} disabled{% endif %}"
+            data-feeling="{{ usermii.feeling }}"
+            data-action="/posts/{{ post.id }}/empathies"
+            data-sound="SE_WAVE_MII_{% if my_empathy %}CANCEL{% else %}ADD{% endif %}"
+            data-url-id="{{ post.id }}"
+            data-track-action="yeah"
+            data-track-category="empathy"
+          >{% if my_empathy %}{{ usermii.miitoo_delete }}{% else %}{{ usermii.miitoo }}{% endif %}</button>
+          {% endif %}
+          <a href="/posts/{{ post.id }}" class="to-permalink-button" data-pjax="#body">
+            <span class="feeling">{{ empathy_count }}</span>
+            <span class="reply">{{ replies_ctx|length }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empathy icons -->
+  {% if empathies %}
+  <div class="post-permalink-feeling-icons">
+    {% for emp in empathies|slice:":50" %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Replies -->
+  <ul class="list-content reply-list" id="reply-list">
+    {% for rc in replies_ctx %}
+    {% with reply=rc.reply r_user=rc.user mii=rc.mii %}
+    <li id="reply-{{ reply.id }}" class="test-fresh-reply scroll {% if post.pid == reply.pid %}my{% else %}other{% endif %}{% if reply.is_spoiler and not rc.show_spoiler %} hidden{% endif %}{% if mii.official %} official-user{% endif %}{% if reply.screenshot %} with-image{% endif %}">
+      <a href="/users/{{ r_user.user_id }}" class="scroll-focus user-icon-container{% if mii.official %} official-user{% endif %}" data-pjax="#body">
+        <img src="{{ mii.output }}" class="user-icon">
+      </a>
+      <div class="reply-content">
+        <header>
+          <span class="user-name">{{ r_user.screen_name }}</span>
+          <span class="timestamp">{{ rc.human_time }}</span>
+          <span class="spoiler-status{% if reply.is_spoiler %} spoiler{% endif %}">Spoilers</span>
+        </header>
+        <p class="reply-content-text">{{ reply.body }}</p>
+        {% if reply.screenshot %}
+        <a href="#" role="button" class="title-capture-container capture-container" data-modal-open="#capture-page" data-large-capture-url="{{ reply.screenshot }}">
+          <img src="{{ reply.screenshot }}" class="title-capture">
+        </a>
+        {% endif %}
+        {% if reply.is_spoiler and not rc.show_spoiler %}
+        <div class="hidden-content">
+          <p>This comment contains spoilers.</p>
+          <div><a href="#" class="hidden-content-button">View Post</a></div>
+        </div>
+        {% endif %}
+        <div class="reply-meta">
+          {% if me %}
+          <button type="button"{% if not rc.can_yeah %} disabled{% endif %}
+            class="submit miitoo-button{% if rc.my_empathy %} empathy-added{% endif %}{% if not rc.can_yeah %} disabled{% endif %}"
+            data-feeling="{{ mii.feeling }}"
+            data-action="/replies/{{ reply.id }}/empathies"
+            data-sound="SE_WAVE_MII_{% if rc.my_empathy %}CANCEL{% else %}ADD{% endif %}"
+            data-url-id="{{ reply.id }}"
+            data-track-action="yeah"
+            data-track-category="empathy"
+          >{% if rc.my_empathy %}{{ mii.miitoo_delete }}{% else %}{{ mii.miitoo }}{% endif %}</button>
+          {% endif %}
+          <a href="/replies/{{ reply.id }}" class="to-permalink-button" data-pjax="#body">
+            <span class="feeling">{{ rc.empathy_count }}</span>
+          </a>
+        </div>
+      </div>
+    </li>
+    {% endwith %}
+    {% empty %}
+    <li><div class="no-content-window"><div class="window"><p>No comments yet.</p></div></div></li>
+    {% endfor %}
+  </ul>
+
+  {% if me %}
+  <!-- Reply Form -->
+  <div id="add-reply-page" class="add-post-page none" data-modal-types="add-entry add-reply require-body preview-body" data-is-template="1">
+    <header class="add-post-page-header">
+      <h1 class="page-title">Comment on {{ pagetitle }}</h1>
+    </header>
+    <form method="post" action="/posts/{{ post.id }}/replies" class="test-reply-form">
+      {% csrf_token %}
+      <div class="add-post-page-content">
+        <div class="feeling-selector expression">
+          <img src="{{ me_mii.output }}" class="icon">
+          <ul class="buttons">
+            <li class="checked"><input type="radio" name="feeling_id" value="0" class="feeling-button-normal" data-mii-face-url="{{ me_mii.output }}" checked=""></li>
+            <li><input type="radio" name="feeling_id" value="1" class="feeling-button-happy"></li>
+            <li><input type="radio" name="feeling_id" value="2" class="feeling-button-like"></li>
+            <li><input type="radio" name="feeling_id" value="3" class="feeling-button-surprised"></li>
+            <li><input type="radio" name="feeling_id" value="4" class="feeling-button-frustrated"></li>
+            <li><input type="radio" name="feeling_id" value="5" class="feeling-button-puzzled"></li>
+          </ul>
+        </div>
+        <div class="textarea-container textarea-with-menu active-text">
+          <textarea type="text" name="body" class="textarea-text" maxlength="1000" placeholder="Add a comment here."></textarea>
+        </div>
+        <label class="spoiler-button checkbox-button">Spoilers <input type="checkbox" name="is_spoiler" value="1"></label>
+      </div>
+      <input type="button" class="olv-modal-close-button fixed-bottom-button left" value="Cancel" data-sound="SE_WAVE_CANCEL">
+      <input type="button" class="post-button fixed-bottom-button" value="Post" data-post-content-type="text">
+    </form>
+  </div>
+
+  <!-- Reply button -->
+  <a id="header-post-button" class="header-button" href="#" data-modal-open="#add-reply-page">Comment</a>
+  {% endif %}
+
+  <!-- Report dialog -->
+  <div id="report-violation-page" class="add-report-page window-page none" data-modal-types="report report-violation" data-is-template="1">
+    <div class="window">
+      <h1 class="window-title">Report Violation</h1>
+      <form method="post" action="/posts/{{ post.id }}/violations">
+        {% csrf_token %}
+        <div class="window-body"><div class="window-body-inner message">
+          <div class="select-content">
+            <select name="type">
+              <option value="" selected>Please make a selection.</option>
+              <option value="1">Personal Information</option>
+              <option value="2">Violent Content</option>
+              <option value="3">Inappropriate/Harmful</option>
+              <option value="4">Hateful/Bullying</option>
+              <option value="6">Advertising</option>
+              <option value="5">Sexually Explicit</option>
+              <option value="7">Other</option>
+            </select>
+          </div>
+          <textarea name="body" class="textarea" maxlength="100" placeholder="Enter a reason."></textarea>
+        </div></div>
+        <div class="window-bottom-buttons">
+          <input type="button" class="olv-modal-close-button button" value="Cancel" data-sound="SE_WAVE_CANCEL">
+          <input type="submit" class="post-button button" value="Submit Report">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit/delete dialog -->
+  {% if me and me.pid == post.pid %}
+  <div id="edit-post-page" class="window-page none" data-modal-types="edit-post">
+    <div class="window">
+      <h1 class="window-title">Edit Post</h1>
+      <form method="post" class="edit-post-form" action="">
+        {% csrf_token %}
+        <div class="window-body"><div class="window-body-inner message">
+          <div class="select-content">
+            <select name="edit-type">
+              <option value="" selected>Select an option.</option>
+              <option value="spoiler"{% if post.is_spoiler %} disabled{% endif %} data-action="/posts/{{ post.id }}.set_spoiler">Set as Spoiler</option>
+              <option value="delete" data-action="/posts/{{ post.id }}.delete">Delete</option>
+            </select>
+          </div>
+        </div></div>
+        <div class="window-bottom-buttons">
+          <input type="button" class="olv-modal-close-button button" value="Cancel" data-sound="SE_WAVE_CANCEL">
+          <input type="submit" class="post-button button" value="Submit">
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

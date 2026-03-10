@@ -1,0 +1,61 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+
+  {% if favorite_post and favorite_post.screenshot %}
+  <a href="/web/posts/{{ favorite_post.id }}" class="user-profile-memo-container" style="background-image:url({{ favorite_post.screenshot }})">
+    <img src="{{ favorite_post.screenshot }}" class="user-profile-screenshot">
+  </a>
+  {% endif %}
+
+  <div id="user-content" class="{% if usermii.official %}official-user {% endif %}{% if not favorite_post %} no-profile-post-user{% endif %}">
+    <span class="icon-container{% if usermii.official %} official-user{% endif %}">
+      <img src="{{ usermii.output }}" class="icon">
+    </span>
+    {% if profile_user.official_user %}
+    <span class="user-organization">{{ profile_user.organization }}</span>
+    {% endif %}
+    <div class="nick-name">{{ profile_user.screen_name }}<span class="id-name">{{ profile_user.user_id }}</span></div>
+
+    {% if is_me %}
+    <div id="user-menu">
+      <div id="my-menu"><a href="/web/my_menu" class="button symbol">User Menu</a></div>
+      <div id="edit-profile-settings"><a class="button symbol" href="/web/settings/profile">Profile Settings</a></div>
+    </div>
+    {% elif me %}
+    <div class="user-action-content">
+      <div class="toggle-button">
+        <form method="post" action="/web/users/{{ profile_user.user_id }}/{% if following %}unfollow{% else %}follow{% endif %}">
+          {% csrf_token %}
+          <button type="submit" class="button symbol">{% if following %}Unfollow{% else %}Follow{% endif %}</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div id="nav-menu" class="nav-4">
+    <a href="/web/users/{{ profile_user.user_id }}/posts" class="{% if page == 'posts' %}selected{% endif %}">
+      <span class="number">{{ num_posts }}</span>
+      <span class="name">Posts</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/friends" class="{% if page == 'friends' %}selected{% endif %}">
+      <span class="number">{% if can_view %}{{ num_friends }}{% else %}-{% endif %} / 100</span>
+      <span class="name">Friends</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/following" class="{% if page == 'following' %}selected{% endif %}">
+      <span class="number">{% if can_view %}{{ num_following }}{% else %}-{% endif %} / 1000</span>
+      <span class="name">Following</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/followers" class="{% if page == 'followers' %}selected{% endif %}">
+      <span class="number">{% if can_view %}{{ num_followers }}{% else %}-{% endif %}</span>
+      <span class="name">Followers</span>
+    </a>
+  </div>
+
+  {% if profile.comment %}
+  <p class="user-comment">{{ profile.comment }}</p>
+  {% endif %}
+</div>
+{% endblock %}

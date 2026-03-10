@@ -1,0 +1,34 @@
+{% extends "offdevice/base.html" %}
+{% block content %}
+<div id="main-body">
+  <h2 class="headline">News</h2>
+  <div class="list news-list">
+    {% for nc in news_ctx %}
+    {% with item=nc.item from_user=nc.from_user from_mii=nc.from_mii %}
+    <div class="news-list-content{% if not item.has_read %} notify{% endif %} trigger" tabindex="0"
+      data-href="{% if item.news_context == 6 %}/web/users/{{ from_user.user_id }}{% else %}/web/posts/{{ item.id }}{% endif %}">
+      <a href="/web/users/{{ from_user.user_id }}" class="icon-container{% if from_mii.official %} official-user{% endif %}">
+        <img src="{{ from_mii.output }}" class="icon">
+      </a>
+      <div class="body">
+        {% if item.news_context == 2 %}
+        <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a> gave <a href="/web/posts/{{ item.id }}" class="link">your Post</a> a Yeah.
+        {% elif item.news_context == 3 %}
+        <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a> gave <a href="/web/replies/{{ item.id }}" class="link">your Comment</a> a Yeah.
+        {% elif item.news_context == 4 %}
+        <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a> commented on <a href="/web/posts/{{ item.id }}" class="link">your post</a>.
+        {% elif item.news_context == 6 %}
+        Followed by <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>.
+        {% else %}
+        Notification from {{ from_user.screen_name }}.
+        {% endif %}
+        <span class="timestamp"> {{ nc.human_time }}</span>
+      </div>
+    </div>
+    {% endwith %}
+    {% empty %}
+    <div class="no-content"><div><p>You have no notifications.</p></div></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

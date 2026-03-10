@@ -1,0 +1,52 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title">Grape::Account</h1>
+</header>
+
+<div class="help-left-button">
+  <a href="/" class="guide-exit-button exit-button index" data-sound="SE_WAVE_BACK">Cancel</a>
+</div>
+<h2 id="sub-header" class="guide-sub-header">Create Account</h2>
+<div id="guide" class="help-content">
+  {% if errors %}
+  <ul style="color:red;">
+    {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <label>Login ID (6-20 characters, letters/numbers/- . _)<br>
+        <input type="text" name="user_id" class="textbox" maxlength="20" value="{{ form_data.user_id|default:'' }}" autocomplete="username">
+      </label>
+    </div>
+    <div>
+      <label>Screen Name (max 17 characters)<br>
+        <input type="text" name="screen_name" class="textbox" maxlength="17" value="{{ form_data.screen_name|default:'' }}">
+      </label>
+    </div>
+    <div>
+      <label>Password<br>
+        <input type="password" name="password" class="textbox" autocomplete="new-password">
+      </label>
+    </div>
+    <div>
+      <label>Confirm Password<br>
+        <input type="password" name="password2" class="textbox" autocomplete="new-password">
+      </label>
+    </div>
+    <div>
+      <label>Email (optional)<br>
+        <input type="email" name="email" class="textbox" value="{{ form_data.email|default:'' }}">
+      </label>
+    </div>
+    <div>
+      <p><a href="/rules">Please read the rules before creating an account.</a></p>
+    </div>
+    <div>
+      <input type="submit" class="btn_001" value="Create Account">
+    </div>
+  </form>
+</div>
+{% endblock %}

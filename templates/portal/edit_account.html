@@ -1,0 +1,36 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title">Grape::Account</h1>
+</header>
+<div class="help-left-button">
+  <a href="/my_menu" class="guide-exit-button exit-button index" data-sound="SE_WAVE_BACK">Cancel</a>
+</div>
+<h2 id="sub-header" class="guide-sub-header">Edit Account</h2>
+<div id="guide" class="help-content">
+  {% if errors %}
+  <ul style="color:red;">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <label>Screen Name<br>
+        <input type="text" name="screen_name" class="textbox" maxlength="17" value="{{ user.screen_name }}">
+      </label>
+    </div>
+    <div>
+      <label>New Password (leave blank to keep current)<br>
+        <input type="password" name="password" class="textbox">
+      </label>
+    </div>
+    <div>
+      <label>Confirm New Password<br>
+        <input type="password" name="password2" class="textbox">
+      </label>
+    </div>
+    <div>
+      <input type="submit" class="btn_001" value="Save Changes">
+    </div>
+  </form>
+</div>
+{% endblock %}

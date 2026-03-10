@@ -1,0 +1,32 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Search Users</h1>
+</header>
+<div class="body-content">
+  <form method="get" action="/users-search">
+    <input type="text" name="query" value="{{ query }}" placeholder="Enter username or screen name" class="textbox" maxlength="32">
+    <input type="submit" value="Search" class="btn_001">
+  </form>
+  {% if users %}
+  <ul class="list-content-with-icon-and-text arrow-list">
+    {% for u in users %}
+    <li class="scroll test-user-{{ u.user_id }}">
+      <a href="/users/{{ u.user_id }}" class="scroll-focus icon-container" data-pjax="#body">
+        <img src="{{ u.get_mii_url }}" class="icon">
+      </a>
+      <a href="/users/{{ u.user_id }}" class="scroll-focus arrow-button" data-pjax="#body"></a>
+      <div class="body">
+        <p class="title">
+          <span class="nick-name">{{ u.screen_name }}</span>
+          <span class="id-name">{{ u.user_id }}</span>
+        </p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif query %}
+  <div class="no-content-window"><div class="window"><p>No users found for "{{ query }}".</p></div></div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">User Menu</h1>
+</header>
+
+<div class="body-content" id="my-menu">
+  <div>
+    <a href="/users/{{ me.user_id }}" data-pjax="#body" class="scroll big-button">My Profile</a>
+    <a href="/settings/account" data-pjax="#body" id="my-menu-settings" class="scroll big-button">Account Settings</a>
+    <a href="/my_blacklist" data-pjax="#body" id="my-menu-blocklist" class="scroll big-button">Blocked Users</a>
+    <a href="/act/edit" class="scroll big-button">Edit Account</a>
+    <a href="/rules" data-pjax="#body" class="scroll big-button">Rules &amp; Guidelines</a>
+    <a href="/act/logout" class="scroll big-button">Log Out</a>
+  </div>
+</div>
+{% endblock %}

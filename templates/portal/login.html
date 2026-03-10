@@ -1,0 +1,33 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title">Grape::Account</h1>
+</header>
+
+<div class="help-left-button">
+  <a href="{{ location|default:'/' }}" class="guide-exit-button exit-button index" data-sound="SE_WAVE_BACK">Cancel</a>
+</div>
+<h2 id="sub-header" class="guide-sub-header">Sign In</h2>
+<div id="guide" class="help-content">
+  {% if error %}
+  <p style="color:red;">{{ error }}</p>
+  {% endif %}
+  <form method="post" action="/act/login{% if location %}?location={{ location }}{% endif %}">
+    {% csrf_token %}
+    <div>
+      <label>Login ID<br>
+        <input type="text" name="user_id" class="textbox" maxlength="20" autocomplete="username">
+      </label>
+    </div>
+    <div>
+      <label>Password<br>
+        <input type="password" name="password" class="textbox" autocomplete="current-password">
+      </label>
+    </div>
+    <div>
+      <input type="submit" class="btn_001" value="Sign In">
+    </div>
+    <p><a href="/act/create">Create a new account</a></p>
+  </form>
+</div>
+{% endblock %}

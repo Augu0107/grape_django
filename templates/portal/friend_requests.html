@@ -1,0 +1,27 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Friend Requests</h1>
+</header>
+<div class="body-content">
+  <ul class="list-content-with-icon-and-text">
+    {% for rc in reqs_ctx %}
+    <li>
+      <a href="/users/{{ rc.sender.user_id }}" class="scroll-focus icon-container" data-pjax="#body">
+        <img src="{{ rc.sender_mii.output }}" class="icon">
+      </a>
+      <div class="body">
+        <p class="title">
+          <span class="nick-name">{{ rc.sender.screen_name }}</span>
+        </p>
+        {% if rc.fr.message %}
+        <p class="text">{{ rc.fr.message }}</p>
+        {% endif %}
+      </div>
+    </li>
+    {% empty %}
+    <li><div class="no-content-window"><div class="window"><p>No pending friend requests.</p></div></div></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

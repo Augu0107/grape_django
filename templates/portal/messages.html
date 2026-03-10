@@ -1,0 +1,26 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Messages</h1>
+</header>
+<div class="body-content">
+  <ul class="list-content-with-icon-and-text arrow-list">
+    {% for cc in convs_ctx %}
+    <li class="scroll">
+      <a href="/users/{{ cc.other.user_id }}" class="icon-container" data-pjax="#body">
+        <img src="{{ cc.other_mii.output }}" class="icon">
+      </a>
+      <a href="/friend_messages?conversation_id={{ cc.conv.conversation_id }}" data-pjax="#body" class="arrow-button scroll"></a>
+      <div class="body">
+        <p class="title"><span class="nick-name">{{ cc.other.screen_name }}</span></p>
+        {% if cc.last_msg %}
+        <p class="text">{{ cc.last_msg.body|truncatechars:50 }}</p>
+        {% endif %}
+      </div>
+    </li>
+    {% empty %}
+    <li><div class="no-content-window"><div class="window"><p>No messages.</p></div></div></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

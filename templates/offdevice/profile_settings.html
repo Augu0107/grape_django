@@ -1,0 +1,24 @@
+{% extends "offdevice/base.html" %}
+{% block content %}
+<div id="main-body">
+  <h2 class="headline">Profile Settings</h2>
+  <form method="post" class="form-area">
+    {% csrf_token %}
+    <div class="field">
+      <label>Profile Comment</label>
+      <textarea name="comment" class="textarea" maxlength="255">{{ profile.comment|default:'' }}</textarea>
+    </div>
+    <div class="field">
+      <label>Allow Friend Requests
+        <select name="allow_request">
+          <option value="1" {% if profile.allow_request == 1 %}selected{% endif %}>Yes</option>
+          <option value="0" {% if profile.allow_request == 0 %}selected{% endif %}>No</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-buttons">
+      <input type="submit" class="black-button" value="Save">
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">News</h1>
+</header>
+
+<div class="body-content">
+  <ul class="list-content-with-icon-and-text">
+    {% for nc in news_ctx %}
+    {% with item=nc.item from_user=nc.from_user from_mii=nc.from_mii %}
+    <li>
+      <a href="/users/{{ from_user.user_id }}" data-pjax="#body"
+         class="icon-container{% if from_mii.official %} official-user{% endif %}{% if not item.has_read %} notify{% endif %}">
+        <img src="{{ from_mii.output }}" class="icon">
+      </a>
+
+      {% if item.news_context == 2 %}
+      <a href="/posts/{{ item.id }}" data-pjax="#body" class="arrow-button scroll"></a>
+      <div class="body"><p class="text">
+        <span class="user-name">{{ from_user.screen_name }}</span> gave your post a Yeah.
+        <span class="timestamp"> {{ nc.human_time }}</span>
+      </p></div>
+      {% elif item.news_context == 3 %}
+      <a href="/replies/{{ item.id }}" data-pjax="#body" class="arrow-button scroll"></a>
+      <div class="body"><p class="text">
+        <span class="user-name">{{ from_user.screen_name }}</span> gave your comment a Yeah.
+        <span class="timestamp"> {{ nc.human_time }}</span>
+      </p></div>
+      {% elif item.news_context == 4 %}
+      <a href="/posts/{{ item.id }}" data-pjax="#body" class="arrow-button scroll"></a>
+      <div class="body"><p class="text">
+        <span class="user-name">{{ from_user.screen_name }}</span> commented on your post.
+        <span class="timestamp"> {{ nc.human_time }}</span>
+      </p></div>
+      {% elif item.news_context == 6 %}
+      <a href="/users/{{ from_user.user_id }}" data-pjax="#body" class="arrow-button scroll"></a>
+      <div class="body"><p class="text">
+        Followed by <span class="user-name">{{ from_user.screen_name }}</span>.
+        <span class="timestamp"> {{ nc.human_time }}</span>
+      </p></div>
+      {% else %}
+      <a href="#" class="arrow-button scroll"></a>
+      <div class="body"><p class="text">
+        Notification from <span class="user-name">{{ from_user.screen_name }}</span>.
+        <span class="timestamp"> {{ nc.human_time }}</span>
+      </p></div>
+      {% endif %}
+    </li>
+    {% endwith %}
+    {% empty %}
+    <li><div class="no-content-window"><div class="window"><p>You have no notifications.</p></div></div></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

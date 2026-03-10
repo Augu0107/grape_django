@@ -1,0 +1,91 @@
+{% load grape_tags %}
+{% for pc in posts_ctx %}
+{% with post=pc.post user=pc.user usermii=pc.usermii community=pc.community %}
+<div id="post-{{ post.id }}" class="post scroll post-subtype-default{% if post.is_spoiler %} {% if not pc.show_spoiler %}hidden{% endif %}{% endif %}{% if post.screenshot %} with-image{% endif %}" data-post-permalink-url="/posts/{{ post.id }}">
+  <a href="/users/{{ user.user_id }}" class="user-icon-container scroll-focus{% if usermii.official %} official-user{% endif %}" data-pjax="#body">
+    <img src="{{ usermii.output }}" class="user-icon">
+  </a>
+  <div class="post-body-content">
+    <div class="post-body">
+      <header>
+        <span class="user-name">{{ user.screen_name }}</span>
+        <span class="timestamp">{{ pc.human_time }}</span>
+        <span class="spoiler-status{% if post.is_spoiler %} spoiler{% endif %}">Spoilers</span>
+      </header>
+
+      {% if post.screenshot %}
+      <a href="#" role="button" class="title-capture-container capture-container" data-modal-open="#capture-page" data-large-capture-url="{{ post.screenshot }}">
+        <img src="{{ post.screenshot }}" class="title-capture">
+      </a>
+      {% endif %}
+
+      <div class="post-content">
+        {% if post.is_hidden %}
+        <p class="deleted-message">Deleted by administrator.</p>
+        {% else %}
+        {% if post.post_type == "artwork" %}
+        <p class="post-content-memo"><img src="{{ post.body }}" class="post-memo"></p>
+        {% else %}
+        <p class="post-content-text">{{ post.body|truncate_body:200 }}</p>
+        {% endif %}
+        {% if post.is_spoiler and not pc.show_spoiler %}
+        <div class="hidden-content">
+          <p>This post contains spoilers.</p>
+          <div><a href="#" class="hidden-content-button">View Post</a></div>
+        </div>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="post-meta">
+        {% if me %}
+        <button type="button"{% if not pc.can_yeah %} disabled{% endif %}
+          class="submit miitoo-button{% if pc.my_empathy %} empathy-added{% endif %}{% if not pc.can_yeah %} disabled{% endif %}"
+          data-feeling="{{ usermii.feeling }}"
+          data-action="/posts/{{ post.id }}/empathies"
+          data-sound="SE_WAVE_MII_{% if pc.my_empathy %}CANCEL{% else %}ADD{% endif %}"
+          data-url-id="{{ post.id }}"
+          data-track-action="yeah"
+          data-track-category="empathy"
+        >{% if pc.my_empathy %}{{ usermii.miitoo_delete }}{% else %}{{ usermii.miitoo }}{% endif %}</button>
+        {% endif %}
+        <a href="/posts/{{ post.id }}" class="to-permalink-button" data-pjax="#body">
+          <span class="feeling">{{ pc.empathy_count }}</span>
+          <span class="reply">{{ pc.reply_count }}</span>
+        </a>
+      </div>
+
+      {% if pc.recent_reply %}
+      {% with rr=pc.recent_reply %}
+      <div id="recent-reply-{{ rr.reply.id }}" class="recent-reply">
+        <a href="/users/{{ rr.user.user_id }}" class="user-icon-container scroll-focus" data-pjax="#body">
+          <img src="{{ rr.mii.output }}" class="user-icon">
+        </a>
+        <div class="recent-reply-body-content">
+          <div class="recent-reply-body">
+            <header>
+              <span class="user-name">{{ rr.user.screen_name }}</span>
+              <span class="timestamp">{{ rr.human_time }}</span>
+            </header>
+            <div class="recent-reply-content">
+              <p class="recent-reply-content-text">{{ rr.reply.body|truncate_body:200 }}</p>
+            </div>
+            <a href="/posts/{{ post.id }}" class="to-permalink-button" data-pjax="#body"></a>
+          </div>
+          {% if rr.total_count >= 2 %}
+          <a href="/posts/{{ post.id }}" class="button read-more-button to-permalink-button" data-pjax="#body">
+            View {% if rr.total_count >= 3 %}More Comments{% else %}Other Comment{% endif %} ({{ rr.total_count|add:"-1" }})
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endwith %}
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endwith %}
+{% empty %}
+<div class="no-content-window"><div class="window"><p>No posts yet. Be the first to post!</p></div></div>
+{% endfor %}

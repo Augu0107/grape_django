@@ -1,0 +1,51 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+  {% include "offdevice/partials/user_content.html" %}
+
+  <div id="nav-menu" class="nav-4">
+    <a href="/web/users/{{ profile_user.user_id }}/posts" class="{% if list_type == 'posts' %}selected{% endif %}">
+      <span class="number">{{ num_posts|default:"0" }}</span>
+      <span class="name">Posts</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/friends" class="{% if list_type == 'friends' %}selected{% endif %}">
+      <span class="number">{{ num_friends|default:"0" }} / 100</span>
+      <span class="name">Friends</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/following" class="{% if list_type == 'following' %}selected{% endif %}">
+      <span class="number">{{ num_following|default:"0" }} / 1000</span>
+      <span class="name">Following</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/followers" class="{% if list_type == 'followers' %}selected{% endif %}">
+      <span class="number">{{ num_followers|default:"0" }}</span>
+      <span class="name">Followers</span>
+    </a>
+  </div>
+
+  <div class="list follow-list {{ list_type }}">
+    {% if not users_ctx %}
+    <div class="no-content"><div>
+      <p>{% if list_type == 'friends' %}No friends to display.{% elif list_type == 'following' %}No followed users.{% else %}No followers.{% endif %}</p>
+    </div></div>
+    {% else %}
+    <ul class="list-content-with-icon-and-text arrow-list" id="{{ list_type }}-list-content"
+      data-next-page-url="{% if next_offset %}?offset={{ next_offset }}{% endif %}">
+      {% for uc in users_ctx %}
+      <li class="trigger" data-href="/web/users/{{ uc.user.user_id }}">
+        <a href="/web/users/{{ uc.user.user_id }}" class="icon-container{% if uc.mii.official %} official-user{% endif %}">
+          <img src="{{ uc.mii.output }}" class="icon">
+        </a>
+        <div class="body">
+          <p class="title">
+            <span class="nick-name"><a href="/web/users/{{ uc.user.user_id }}">{{ uc.user.screen_name }}</a></span>
+            <span class="id-name">{{ uc.user.user_id }}</span>
+          </p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

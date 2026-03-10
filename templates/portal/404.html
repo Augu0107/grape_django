@@ -1,0 +1,16 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Error</h1>
+</header>
+<div class="body-content track-error" data-track-error="404">
+  <div class="no-content-window">
+    <div class="window">
+      <p>The page you are looking for could not be found.</p>
+      <div class="window-bottom-buttons single-button">
+        <a href="/" class="button" data-pjax="#body">Return to Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

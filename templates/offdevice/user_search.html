@@ -1,0 +1,34 @@
+{% extends "offdevice/base.html" %}
+{% block content %}
+<div id="main-body">
+  <h2 class="headline">Search Users</h2>
+  <form method="get" action="/web/users-search" class="form-area">
+    <input type="text" name="query" value="{{ query }}" placeholder="Username or screen name" class="textarea" maxlength="32">
+    <div class="form-buttons">
+      <input type="submit" class="black-button" value="Search">
+    </div>
+  </form>
+  {% if users %}
+  <ul class="list user-list">
+    {% for u in users %}
+    <li class="trigger" data-href="/web/users/{{ u.user_id }}">
+      <a href="/web/users/{{ u.user_id }}" class="icon-container">
+        <img src="{{ u.get_mii_url }}" class="icon">
+      </a>
+      <div class="body">
+        <p class="title">
+          <span class="nick-name"><a href="/web/users/{{ u.user_id }}">{{ u.screen_name }}</a></span>
+          <span class="id-name">{{ u.user_id }}</span>
+        </p>
+      </div>
+      <div>
+        <a class="button" href="/web/users/{{ u.user_id }}">View Profile</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif query %}
+  <div class="no-content"><div><p>No users found for "{{ query }}".</p></div></div>
+  {% endif %}
+</div>
+{% endblock %}

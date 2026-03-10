@@ -1,0 +1,16 @@
+{% extends "offdevice/base.html" %}
+{% block content %}
+<div id="main-body">
+  <h2 class="headline">User Menu</h2>
+  <div class="list my-menu-list">
+    <a href="/web/users/{{ me.user_id }}" id="my-menu-profile" class="scroll big-button">Profile</a>
+    <a href="/web/settings/account" id="my-menu-settings-profile" class="scroll big-button">Account Settings</a>
+    <a href="/web/act/edit" id="my-menu-edit" class="scroll big-button">Edit Account</a>
+    <a href="/web/rules" class="scroll big-button">Rules &amp; Guidelines</a>
+    <form action="/web/act/logout" method="get" id="my-menu-logout" class="symbol">
+      <input type="hidden" name="location" value="/web/">
+      <input type="submit" value="Log Out">
+    </form>
+  </div>
+</div>
+{% endblock %}

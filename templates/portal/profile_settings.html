@@ -1,0 +1,36 @@
+{% extends "portal/base.html" %}
+{% block body %}
+<header id="header">
+  <h1 id="page-title" class="">Profile Settings</h1>
+</header>
+<div class="body-content">
+  <form method="post">
+    {% csrf_token %}
+    <div>
+      <label>Profile Comment<br>
+        <textarea name="comment" maxlength="255" class="textbox">{{ profile.comment|default:'' }}</textarea>
+      </label>
+    </div>
+    <div>
+      <label>Allow Friend Requests
+        <select name="allow_request">
+          <option value="1" {% if profile.allow_request == 1 %}selected{% endif %}>Yes</option>
+          <option value="0" {% if profile.allow_request == 0 %}selected{% endif %}>No</option>
+        </select>
+      </label>
+    </div>
+    <div>
+      <label>Relationship Visibility
+        <select name="relationship_visibility">
+          <option value="0" {% if profile.relationship_visibility == 0 %}selected{% endif %}>Public</option>
+          <option value="1" {% if profile.relationship_visibility == 1 %}selected{% endif %}>Friends Only</option>
+          <option value="2" {% if profile.relationship_visibility == 2 %}selected{% endif %}>Private</option>
+        </select>
+      </label>
+    </div>
+    <div>
+      <input type="submit" class="btn_001" value="Save">
+    </div>
+  </form>
+</div>
+{% endblock %}

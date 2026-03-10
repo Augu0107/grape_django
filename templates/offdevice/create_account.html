@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Grape::Account</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <style>body { padding-top: 60px; }</style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <meta name="format-detection" content="telephone=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+<body data-spy="scroll" data-target=".bs-docs-sidebar">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Grape::Account</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="page-header"><h3>Create Account</h3></div>
+    {% if errors %}
+    <div class="alert alert-danger">
+      {% for e in errors %}<p>{{ e }}</p>{% endfor %}
+    </div>
+    {% endif %}
+    <form id="act-create" method="POST" action="" class="form-horizontal">
+      {% csrf_token %}
+      <fieldset>
+
+        <div class="form-group">
+          <label class="col-md-4 control-label">Login ID</label>
+          <div class="col-md-4">
+            <input name="user_id" type="text" placeholder="Login ID" class="form-control input-md" required value="{{ form_data.user_id|default:'' }}">
+            <span class="help-block">6-20 characters: letters, numbers, -, _, .</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-4 control-label">Password</label>
+          <div class="col-md-4">
+            <input name="password" type="password" placeholder="Password" class="form-control input-md" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-4 control-label">Confirm Password</label>
+          <div class="col-md-4">
+            <input name="password2" type="password" placeholder="Password" class="form-control input-md" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-4 control-label">Screen Name</label>
+          <div class="col-md-4">
+            <input name="screen_name" type="text" placeholder="Screen Name" class="form-control input-md" required value="{{ form_data.screen_name|default:'' }}">
+            <span class="help-block">Up to 17 characters.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-4 control-label">Nintendo Network ID (optional)</label>
+          <div class="col-md-4">
+            <input name="nn_user_id" type="text" placeholder="NNID" class="form-control input-md" value="{{ form_data.nn_user_id|default:'' }}">
+            <span class="help-block">Your NNID to import your Mii.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="col-md-4">
+            <a href="/web/act/login" class="btn btn-default">Back</a>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </div>
+        </div>
+
+      </fieldset>
+    </form>
+  </div>
+  <footer class="footer"><div class="container" style="text-align:center;"><hr>grape</div></footer>
+</body>
+</html>
