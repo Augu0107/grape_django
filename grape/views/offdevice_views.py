@@ -30,6 +30,7 @@ def od_root_view(request):
         'pagetitle': 'Communities',
         'me': me,
         'me_mii': get_mii(me, 0) if me else None,
+        'mnselect': 'community',
     })
 
 
@@ -44,14 +45,28 @@ def od_activity_view(request):
     friend_pids_2 = list(FriendRelationship.objects.filter(target=me.pid).values_list('source', flat=True))
     all_pids = list(set(following_pids + friend_pids_1 + friend_pids_2))
 
+    has_following = len(following_pids) > 0
+
     posts = []
     if all_pids:
         posts = list(Post.objects.filter(pid__in=all_pids, is_hidden=False).order_by('-created_at')[offset:offset + 50])
 
     posts_ctx = _build_posts_ctx(posts, me)
 
+    next_page_url = ''
+    if len(posts) > 49:
+        next_page_url = f'/web/activity?offset={offset + 50}'
+
+    # Official users for tutorial
+    official_users_qs = Person.objects.filter(official_user=True).order_by('-pid')[:5]
+    official_users = [{'user': u, 'mii': get_mii(u, 0)} for u in official_users_qs]
+
     return render(request, 'offdevice/activity.html', {
+        'posts': posts,
         'posts_ctx': posts_ctx,
+        'has_following': has_following,
+        'next_page_url': next_page_url,
+        'official_users': official_users,
         'pagetitle': 'Activity Feed',
         'me': me,
         'me_mii': get_mii(me, 0),
@@ -222,10 +237,13 @@ def od_user_profile_view(request, user_id):
 
     can_view = is_me or (me and profile_relationship_visible(me.pid, user.pid, profile.relationship_visibility))
 
+    num_empathies = Empathy.objects.filter(pid=user.pid).count()
+
     return render(request, 'offdevice/user_profile.html', {
         'profile_user': user,
         'profile': profile,
         'usermii': usermii,
+        'profile_mii': usermii,  # alias for user_content.html partial
         'favorite_post': favorite_post,
         'is_me': is_me,
         'following': following,
@@ -233,6 +251,7 @@ def od_user_profile_view(request, user_id):
         'num_friends': num_friends,
         'num_following': num_following,
         'num_followers': num_followers,
+        'num_empathies': num_empathies,
         'can_view': can_view,
         'pagetitle': f"{user.screen_name}'s Profile",
         'me': me,
@@ -405,15 +424,50 @@ def od_profile_settings_view(request):
     profile = get_or_create_profile(me)
 
     if request.method == 'POST':
-        comment = request.POST.get('comment', '').strip()[:255]
-        allow_request = int(request.POST.get('allow_request', 1))
+        comment = request.POST.get('profile_comment', '').strip()[:1000]
+        gender = request.POST.get('gender', '3')
+        country = request.POST.get('country', '')[:50]
+        game_experience = request.POST.get('game_skill', '1')
+        relationship_visibility = request.POST.get('relationship_visibility', '1')
+
+        # Validate ranges
+        try:
+            gender = str(max(1, min(3, int(gender))))
+        except (ValueError, TypeError):
+            gender = '3'
+        try:
+            game_experience = str(max(0, min(2, int(game_experience))))
+        except (ValueError, TypeError):
+            game_experience = '1'
+        try:
+            relationship_visibility = str(max(1, min(3, int(relationship_visibility))))
+        except (ValueError, TypeError):
+            relationship_visibility = '1'
+
         profile.comment = comment
-        profile.allow_request = allow_request
+        profile.gender = gender
+        profile.country = country
+        profile.game_experience = game_experience
+        profile.relationship_visibility = relationship_visibility
         profile.save()
+        from django.http import JsonResponse
+        if request.headers.get('Content-Type') == 'application/json':
+            return JsonResponse({'success': 1})
         return redirect(f'/web/users/{me.user_id}')
+
+    # Get favorite screenshot post
+    favorite_post_screenshot = None
+    if profile.favorite_screenshot:
+        try:
+            fp = Post.objects.get(id=profile.favorite_screenshot, is_hidden=False)
+            if fp.screenshot:
+                favorite_post_screenshot = fp.screenshot
+        except Post.DoesNotExist:
+            pass
 
     return render(request, 'offdevice/profile_settings.html', {
         'profile': profile,
+        'favorite_screenshot': favorite_post_screenshot,
         'pagetitle': 'Profile Settings',
         'me': me,
         'me_mii': get_mii(me, 0),
@@ -426,13 +480,16 @@ def od_user_search_view(request):
     offset = int(request.GET.get('offset', 0))
 
     users = []
+    users_ctx = []
     if query:
         users = Person.objects.filter(
             Q(user_id__istartswith=query) | Q(screen_name__istartswith=query)
         ).order_by('-created_at')[offset:offset + 50]
+        users_ctx = [{'user': u, 'mii': get_mii(u, 0)} for u in users]
 
     return render(request, 'offdevice/user_search.html', {
         'users': users,
+        'users_ctx': users_ctx,
         'query': query,
         'pagetitle': 'Search Users',
         'me': me,
@@ -587,9 +644,15 @@ def od_account_settings_view(request):
 
     profile = get_or_create_profile(me)
     if request.method == 'POST':
-        empathy_optout = request.POST.get('empathy_optout') == '1'
-        profile.empathy_optout = empathy_optout
+        opt_out_val = request.POST.get('notify.empathy_notice_opt_out', '0')
+        try:
+            profile.empathy_optout = bool(int(opt_out_val))
+        except (ValueError, TypeError):
+            profile.empathy_optout = False
         profile.save()
+        from django.http import JsonResponse
+        if request.headers.get('Content-Type') == 'application/json':
+            return JsonResponse({'success': 1})
         return redirect('/web/my_menu')
 
     return render(request, 'offdevice/account_settings.html', {
@@ -610,3 +673,180 @@ def od_rules_view(request):
 
 
 from django.http import HttpResponse
+
+
+def od_news_view(request):
+    me = get_me(request)
+    if not me:
+        return redirect('/web/act/login?location=/web/news/my_news')
+
+    news_list = News.objects.filter(
+        to_pid=me.pid, merged__isnull=True
+    ).order_by('-created_at')[:65]
+
+    news_ctx = []
+    for news in news_list:
+        try:
+            from_user = Person.objects.get(pid=news.from_pid)
+            from_mii = get_mii(from_user, 0)
+        except Person.DoesNotExist:
+            from_user = None
+            from_mii = None
+
+        # Resolve body/url based on news_context
+        news_url = None
+        news_body = None
+        if news.news_context in (2, 4, 5):
+            news_url = f'/web/posts/{news.id}'
+            try:
+                post = Post.objects.get(id=news.id)
+                news_body = 'handwritten' if post.post_type == 'artwork' else (post.body or '')[:17]
+            except Post.DoesNotExist:
+                news_body = 'not found'
+        elif news.news_context == 3:
+            news_url = f'/web/replies/{news.id}'
+            try:
+                reply = Reply.objects.get(id=news.id)
+                news_body = (reply.body or '')[:17]
+            except Reply.DoesNotExist:
+                news_body = 'not found'
+        elif news.news_context == 6:
+            news_url = f'/web/users/{from_user.user_id}' if from_user else '#'
+
+        # Merged news (up to 20)
+        merged = list(News.objects.filter(merged=news.news_id).order_by('created_at')[:20])
+
+        news_ctx.append({
+            'news': news,
+            'from_user': from_user,
+            'from_mii': from_mii,
+            'news_url': news_url,
+            'news_body': news_body,
+            'merged': merged,
+            'merged_count': len(merged),
+        })
+
+    # Mark all as read
+    News.objects.filter(to_pid=me.pid, has_read=False).update(has_read=True)
+
+    return render(request, 'offdevice/news.html', {
+        'news_ctx': news_ctx,
+        'pagetitle': 'Notifications',
+        'me': me,
+        'me_mii': get_mii(me, 0) if me else None,
+        'mnselect': 'news',
+    })
+
+
+def od_user_empathies_view(request, user_id):
+    me = get_me(request)
+    user = get_object_or_404(Person, user_id=user_id)
+    if me and can_user_view(me.pid, user.pid):
+        return render(request, 'offdevice/404.html', status=404)
+
+    profile = get_or_create_profile(user)
+    profile_mii = get_mii(user, 0)
+    is_me = me and me.pid == user.pid
+    following = False
+    if me and not is_me:
+        following = Relationship.objects.filter(source=me.pid, target=user.pid).exists()
+
+    offset = int(request.GET.get('offset', 0))
+    # Get post IDs this user gave a Yeah to
+    empathy_post_ids = list(Empathy.objects.filter(pid=user.pid).values_list('id', flat=True)[offset:offset + 50])
+    posts_qs = Post.objects.filter(id__in=empathy_post_ids, is_hidden=False).order_by('-created_at')
+    posts = list(posts_qs)
+    posts_ctx = _build_posts_ctx(posts, me)
+
+    num_posts = Post.objects.filter(pid=user.pid, is_hidden=False).count()
+    num_friends = FriendRelationship.objects.filter(Q(source=user.pid) | Q(target=user.pid)).count()
+    num_following = Relationship.objects.filter(source=user.pid, is_me2me=False).count()
+    num_followers = Relationship.objects.filter(target=user.pid, is_me2me=False).count()
+    can_view = is_me or (me and profile_relationship_visible(me.pid, user.pid, profile.relationship_visibility))
+
+    favorite_post = None
+    if profile.favorite_screenshot:
+        try:
+            fp = Post.objects.get(id=profile.favorite_screenshot, is_hidden=False)
+            if fp.screenshot:
+                favorite_post = fp
+        except Post.DoesNotExist:
+            pass
+
+    return render(request, 'offdevice/user_empathies.html', {
+        'profile_user': user,
+        'profile': profile,
+        'profile_mii': profile_mii,
+        'favorite_post': favorite_post,
+        'is_me': is_me,
+        'following': following,
+        'posts': posts,
+        'posts_ctx': posts_ctx,
+        'num_posts': num_posts,
+        'num_friends': num_friends,
+        'num_following': num_following,
+        'num_followers': num_followers,
+        'can_view': can_view,
+        'pagetitle': f"{user.screen_name}'s Yeah'd Posts",
+        'me': me,
+        'me_mii': get_mii(me, 0) if me else None,
+    })
+
+
+def od_titles_search_view(request):
+    me = get_me(request)
+    query = request.GET.get('query', '').strip()
+
+    titles = []
+    if query:
+        escaped = query.replace('%', r'\%').replace('_', r'\_')
+        titles = list(Title.objects.filter(name__icontains=escaped).order_by('-created_at')[:50])
+    elif request.GET.get('query') is not None:
+        # empty query submitted
+        titles = list(Title.objects.filter(name='').order_by('-created_at')[:50])
+
+    return render(request, 'offdevice/titles_search.html', {
+        'titles': titles,
+        'query': query,
+        'pagetitle': 'Search Communities',
+        'me': me,
+        'me_mii': get_mii(me, 0) if me else None,
+    })
+
+
+def od_identified_user_posts_view(request):
+    me = get_me(request)
+    offset = int(request.GET.get('offset', 0))
+
+    # Get official users ordered by most recent post
+    from django.db.models import Max
+    official_pids = Person.objects.filter(official_user=True).values_list('pid', flat=True)
+    # Get latest post per official user
+    latest_posts_pids = (
+        Post.objects
+        .filter(pid__in=official_pids, is_hidden=False, is_spoiler=False)
+        .values('pid')
+        .annotate(recent=Max('created_at'))
+        .order_by('-recent')[offset:offset + 50]
+    )
+
+    posts = []
+    for row in latest_posts_pids:
+        try:
+            post = Post.objects.filter(pid=row['pid'], is_hidden=False, is_spoiler=False).order_by('-created_at').first()
+            if post:
+                posts.append(post)
+        except Post.DoesNotExist:
+            pass
+
+    posts_ctx = _build_posts_ctx(posts, me)
+    next_page_url = f'/web/identified_user_posts?offset={offset + 50}' if len(posts) >= 50 else ''
+
+    return render(request, 'offdevice/identified_user_posts.html', {
+        'posts': posts,
+        'posts_ctx': posts_ctx,
+        'next_page_url': next_page_url,
+        'pagetitle': 'Posts from Verified Users',
+        'me': me,
+        'me_mii': get_mii(me, 0) if me else None,
+    })

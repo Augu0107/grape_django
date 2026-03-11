@@ -1,34 +1,41 @@
 {% extends "offdevice/base.html" %}
+{% load grape_tags %}
 {% block content %}
 <div id="main-body">
   <h2 class="headline">Search Users</h2>
-  <form method="get" action="/web/users-search" class="form-area">
-    <input type="text" name="query" value="{{ query }}" placeholder="Username or screen name" class="textarea" maxlength="32">
-    <div class="form-buttons">
-      <input type="submit" class="black-button" value="Search">
-    </div>
+
+  <form class="search" action="/web/users-search" method="GET"><!--
+    --><input type="text" name="query" value="{{ query }}" placeholder="Enter the ID or nickname of the user you want to find." minlength="1" maxlength="16"><!--
+    --><input type="submit" value="q" title="Search">
   </form>
+
   {% if users %}
-  <ul class="list user-list">
-    {% for u in users %}
-    <li class="trigger" data-href="/web/users/{{ u.user_id }}">
-      <a href="/web/users/{{ u.user_id }}" class="icon-container">
-        <img src="{{ u.get_mii_url }}" class="icon">
-      </a>
-      <div class="body">
-        <p class="title">
-          <span class="nick-name"><a href="/web/users/{{ u.user_id }}">{{ u.screen_name }}</a></span>
-          <span class="id-name">{{ u.user_id }}</span>
-        </p>
-      </div>
-      <div>
-        <a class="button" href="/web/users/{{ u.user_id }}">View Profile</a>
-      </div>
-    </li>
-    {% endfor %}
-  </ul>
+  <div class="search-user-content search-content">
+    {% if query %}<p class="user-found note">Found "{{ query }}".</p>{% endif %}
+    <div class="list follow-list">
+      <ul id="searched-user-list" class="list-content-with-icon-and-text arrow-list">
+        {% for uc in users_ctx %}
+        <li class="trigger" data-href="/web/users/{{ uc.user.user_id }}">
+          <a href="/web/users/{{ uc.user.user_id }}" class="icon-container{% if uc.mii.official %} official-user{% endif %}">
+            <img src="{{ uc.mii.output }}" class="icon">
+          </a>
+          <div class="body">
+            <p class="title">
+              <span class="nick-name"><a href="/web/users/{{ uc.user.user_id }}">{{ uc.user.screen_name }}</a></span>
+              <span class="id-name">{{ uc.user.user_id }}</span>
+            </p>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
   {% elif query %}
-  <div class="no-content"><div><p>No users found for "{{ query }}".</p></div></div>
+  <div class="search-user-content no-content search-content">
+    <div class="search-content no-title-content">
+      <p>"{{ query }}" could not be found.<br>Select Retry Search if you want to try again.</p>
+    </div>
+  </div>
   {% endif %}
 </div>
 {% endblock %}

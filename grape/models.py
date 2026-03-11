@@ -189,6 +189,9 @@ class Profile(models.Model):
     allow_request = models.IntegerField(default=1)
     relationship_visibility = models.IntegerField(default=0)
     empathy_optout = models.BooleanField(default=False)
+    gender = models.CharField(max_length=1, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    game_experience = models.CharField(max_length=1, blank=True, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:

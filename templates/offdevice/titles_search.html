@@ -1,0 +1,36 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+  <h2 class="headline">Search Communities</h2>
+
+  <form method="GET" action="/web/titles/search" class="search"><!--
+    --><input type="text" name="query" value="{{ query }}" placeholder="Mario, etc." minlength="2" maxlength="20"><!--
+    --><input type="submit" value="q" title="Search">
+  </form>
+
+  {% if titles %}
+  <div class="search-content">
+    <p class="note">Communities found for "{{ query }}".</p>
+    <ul class="list community-list community-title-list">
+      {% for title in titles %}
+      {% with community=title.first_community %}
+      <li class="trigger{% if community %}" data-href="/web/titles/{{ title.olive_title_id }}/{{ community.olive_community_id }}{% endif %}">
+        <a href="{% if community %}/web/titles/{{ title.olive_title_id }}/{{ community.olive_community_id }}{% else %}#{% endif %}" class="icon-container">
+          <img src="{{ title.icon }}" class="icon">
+        </a>
+        <div class="body">
+          <p class="title"><span class="community-name"><a href="{% if community %}/web/titles/{{ title.olive_title_id }}/{{ community.olive_community_id }}{% else %}#{% endif %}">{{ title.name }}</a></span></p>
+        </div>
+      </li>
+      {% endwith %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% elif query %}
+  <div class="search-content no-content">
+    <p>No communities found for<br>"{{ query }}". Please try again.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

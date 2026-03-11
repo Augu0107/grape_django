@@ -2,9 +2,54 @@
 {% load grape_tags %}
 {% block content %}
 <div id="main-body">
-  <h2 class="headline">Activity Feed</h2>
-  <div class="post-list">
+
+  <div class="headline">
+    <h2 class="headline-text">Activity Feed</h2>
+    <form class="search" action="/web/users-search" method="GET"><!--
+      --><input type="text" name="query" title="Search Users" placeholder="Search Users" minlength="1" maxlength="16"><!--
+      --><input type="submit" value="q" title="Search">
+    </form>
+  </div>
+
+  {% if not me %}
+  <div class="no-content"><div><p>Please <a href="/web/act/login">log in</a> to view the activity feed.</p></div></div>
+  {% else %}
+
+  {% if not has_following %}
+  <div id="activity-feed-tutorial">
+    <p class="tleft">In your activity feed, you can view posts from your friends and from people you're following. To get started, why not follow some people whose posts interest you? You can also search for friends using Search Users in the upper right.<br></p>
+    <img src="/img/tutorial/tutorial-activity-feed.png" class="tutorial-image">
+    {% if official_users %}
+    <h3>Latest Updates from Verified Users</h3>
+    <ul class="list list-content-with-icon-and-text arrow-list follow-list">
+      {% for uc in official_users %}
+      <li class="trigger" data-href="/web/users/{{ uc.user.user_id }}">
+        <a href="/web/users/{{ uc.user.user_id }}" class="icon-container{% if uc.mii.official %} official-user{% endif %}">
+          <img src="{{ uc.mii.output }}" class="icon">
+        </a>
+        <div class="body">
+          <p class="title">
+            <span class="nick-name"><a href="/web/users/{{ uc.user.user_id }}">{{ uc.user.screen_name }}</a></span>
+            <span class="id-name">{{ uc.user.user_id }}</span>
+          </p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if posts %}
+  <div class="list post-list js-post-list" data-next-page-url="{{ next_page_url }}">
     {% include "offdevice/partials/post_list.html" %}
   </div>
+  {% else %}
+  <div id="activity-feed-tutorial" class="no-content">
+    <p>There are no posts to display.</p>
+  </div>
+  {% endif %}
+
+  {% endif %}
 </div>
 {% endblock %}

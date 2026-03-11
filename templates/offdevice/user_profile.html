@@ -9,7 +9,7 @@
   </a>
   {% endif %}
 
-  <div id="user-content" class="{% if usermii.official %}official-user {% endif %}{% if not favorite_post %} no-profile-post-user{% endif %}">
+  <div id="user-content" class="{% if usermii.official %}official-user {% endif %}{% if not favorite_post %}no-profile-post-user{% endif %}">
     <span class="icon-container{% if usermii.official %} official-user{% endif %}">
       <img src="{{ usermii.output }}" class="icon">
     </span>
@@ -28,7 +28,9 @@
       <div class="toggle-button">
         <form method="post" action="/web/users/{{ profile_user.user_id }}/{% if following %}unfollow{% else %}follow{% endif %}">
           {% csrf_token %}
-          <button type="submit" class="button symbol">{% if following %}Unfollow{% else %}Follow{% endif %}</button>
+          <button type="submit" class="button symbol follow-button{% if following %} following{% endif %}">
+            {% if following %}Unfollow{% else %}Follow{% endif %}
+          </button>
         </form>
       </div>
     </div>
@@ -54,8 +56,53 @@
     </a>
   </div>
 
+  <div class="tab2 user-menu-activity">
+    <a href="/web/users/{{ profile_user.user_id }}/posts" class="{% if page == 'posts' %}selected{% endif %}">
+      <span class="label">Posts</span><span class="number">{{ num_posts }}</span>
+    </a>
+    <a href="/web/users/{{ profile_user.user_id }}/empathies" class="{% if page == 'empathies' %}selected{% endif %}">
+      <span class="label">Yeahs</span><span class="number">{{ num_empathies }}</span>
+    </a>
+  </div>
+
   {% if profile.comment %}
-  <p class="user-comment">{{ profile.comment }}</p>
+  <p class="profile-comment">{{ profile.comment|linebreaksbr }}</p>
   {% endif %}
+
+  <div class="user-data">
+    <div class="user-main-profile data-content">
+      <h4><span>Country</span></h4>
+      <div class="note">{{ profile.country|default:"Not Set" }}</div>
+      <h4><span>Gender</span></h4>
+      <div class="note birthday">
+        {% if profile.gender == '1' %}Male
+        {% elif profile.gender == '2' %}Female
+        {% else %}Not Set{% endif %}
+      </div>
+    </div>
+    <div class="game-skill data-content">
+      <h4><span>Game Experience</span></h4>
+      <div class="note">
+        {% if profile.game_experience == '0' %}<span class="beginner">Beginner</span>
+        {% elif profile.game_experience == '2' %}<span class="expert">Expert</span>
+        {% else %}<span class="intermediate">Intermediate</span>{% endif %}
+      </div>
+    </div>
+    <div class="game data-content">
+      <h4><span>Systems Owned</span></h4>
+      <div class="note">
+        <div class="device-{% if profile_user.platform_id == 0 %}n3ds{% else %}wiiu{% endif %}">
+          {% if profile_user.platform_id == 0 %}
+            <img src="/img/n3ds.png" class="n3ds-icon"><span>Nintendo 3DS</span>
+          {% elif profile_user.platform_id == 1 %}
+            <img src="/img/wiiu.png" class="wiiu-icon"><span>Wii U</span>
+          {% else %}
+            <span>Off-Device</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}

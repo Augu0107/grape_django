@@ -2,22 +2,82 @@
 {% block content %}
 <div id="main-body">
   <h2 class="headline">Profile Settings</h2>
-  <form method="post" class="form-area">
+  <form id="profile-settings-form" class="setting-form" method="post" action="/web/settings/profile">
     {% csrf_token %}
-    <div class="field">
-      <label>Profile Comment</label>
-      <textarea name="comment" class="textarea" maxlength="255">{{ profile.comment|default:'' }}</textarea>
-    </div>
-    <div class="field">
-      <label>Allow Friend Requests
-        <select name="allow_request">
-          <option value="1" {% if profile.allow_request == 1 %}selected{% endif %}>Yes</option>
-          <option value="0" {% if profile.allow_request == 0 %}selected{% endif %}>No</option>
-        </select>
-      </label>
-    </div>
+    <ul class="settings-list">
+
+      <li class="setting-profile-comment">
+        <p class="settings-label">Profile Comment</p>
+        <textarea id="profile-text" class="textarea" name="profile_comment" maxlength="1000" placeholder="Write about yourself here.">{{ profile.comment|default:'' }}</textarea>
+      </li>
+
+      <li class="setting-profile-post">
+        <p class="settings-label">Favorite Post</p>
+        <p class="note">You can set one of your own screenshot posts as your favorite from the settings button on that post.</p>
+        {% if favorite_screenshot %}
+        <div class="select-content">
+          <button id="profile-post" type="button" class="submit">
+            <img src="{{ favorite_screenshot }}"><span class="symbol">Remove</span>
+          </button>
+        </div>
+        {% endif %}
+      </li>
+
+      <li>
+        <p class="settings-label"><label for="select_gender">What is your gender?</label></p>
+        <div class="select-content">
+          <div class="select-button">
+            <select name="gender" id="select_gender">
+              <option value="1" {% if profile.gender == '1' %}selected{% endif %}>Male</option>
+              <option value="2" {% if profile.gender == '2' %}selected{% endif %}>Female</option>
+              <option value="3" {% if profile.gender == '3' or not profile.gender %}selected{% endif %}>Not applicable</option>
+            </select>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <p class="settings-label"><label for="select_country">What is your region?</label></p>
+        <div class="select-content">
+          <div class="select-button">
+            <select name="country" id="select_country">
+              <option value="North America" {% if profile.country == 'North America' %}selected{% endif %}>North America</option>
+              <option value="Europe" {% if profile.country == 'Europe' %}selected{% endif %}>Europe</option>
+              <option value="Japan" {% if profile.country == 'Japan' %}selected{% endif %}>Japan</option>
+            </select>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <p class="settings-label"><label for="select_game_skill">How would you describe your experience with games?</label></p>
+        <div class="select-content">
+          <div class="select-button">
+            <select name="game_skill" id="select_game_skill">
+              <option value="0" {% if profile.game_experience == '0' %}selected{% endif %}>Beginner</option>
+              <option value="1" {% if profile.game_experience == '1' or not profile.game_experience %}selected{% endif %}>Intermediate</option>
+              <option value="2" {% if profile.game_experience == '2' %}selected{% endif %}>Expert</option>
+            </select>
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <p class="settings-label"><label for="select_relationship_visibility">Who should be able to see your connections (friend list, followers and followed users)?</label></p>
+        <div class="select-content">
+          <div class="select-button">
+            <select name="relationship_visibility" id="select_relationship_visibility">
+              <option value="1" {% if profile.relationship_visibility == 1 or not profile.relationship_visibility %}selected{% endif %}>Everyone</option>
+              <option value="2" {% if profile.relationship_visibility == 2 %}selected{% endif %}>Wii U Friends Only</option>
+              <option value="3" {% if profile.relationship_visibility == 3 %}selected{% endif %}>Keep Private</option>
+            </select>
+          </div>
+        </div>
+      </li>
+
+    </ul>
     <div class="form-buttons">
-      <input type="submit" class="black-button" value="Save">
+      <input type="submit" class="black-button apply-button" value="Save Settings">
     </div>
   </form>
 </div>

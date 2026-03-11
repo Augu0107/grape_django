@@ -19,6 +19,7 @@ urlpatterns = [
 
     # Communities
     path('communities', offdevice_views.od_communities_view, name='od_communities'),
+    path('titles/search', offdevice_views.od_titles_search_view, name='od_titles_search'),
     path('titles/<str:title_id>/<str:community_id>', offdevice_views.od_community_posts_view, name='od_community_posts'),
 
     # Activity
@@ -39,6 +40,10 @@ urlpatterns = [
     path('users/<str:user_id>/followers', offdevice_views.od_user_followers_view, name='od_user_followers'),
     path('users/<str:user_id>/follow', offdevice_views.od_follow_view, name='od_follow'),
     path('users/<str:user_id>/unfollow', offdevice_views.od_unfollow_view, name='od_unfollow'),
+    path('users/<str:user_id>/empathies', offdevice_views.od_user_empathies_view, name='od_user_empathies'),
+
+    # Identified users
+    path('identified_user_posts', offdevice_views.od_identified_user_posts_view, name='od_identified_user_posts'),
 
     # News
     path('news/my_news', offdevice_views.od_news_view, name='od_news'),

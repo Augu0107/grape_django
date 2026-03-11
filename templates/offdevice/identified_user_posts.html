@@ -1,0 +1,22 @@
+{% extends "offdevice/base.html" %}
+{% load grape_tags %}
+{% block content %}
+<div id="main-body">
+
+  <div id="image-header-content">
+    <span class="image-header-title">
+      <span class="title">Posts from Verified Users</span>
+      <span class="text">Get the latest news here!</span>
+    </span>
+    <img src="/img/identified-user.png">
+  </div>
+
+  {% if posts %}
+  <div class="list post-list" data-next-page-url="{{ next_page_url }}">
+    {% include "offdevice/partials/post_list.html" %}
+  </div>
+  {% else %}
+  <div class="no-content"><div><p>No posts from verified users.</p></div></div>
+  {% endif %}
+</div>
+{% endblock %}

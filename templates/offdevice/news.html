@@ -1,34 +1,76 @@
 {% extends "offdevice/base.html" %}
+{% load grape_tags %}
 {% block content %}
 <div id="main-body">
-  <h2 class="headline">News</h2>
-  <div class="list news-list">
-    {% for nc in news_ctx %}
-    {% with item=nc.item from_user=nc.from_user from_mii=nc.from_mii %}
-    <div class="news-list-content{% if not item.has_read %} notify{% endif %} trigger" tabindex="0"
-      data-href="{% if item.news_context == 6 %}/web/users/{{ from_user.user_id }}{% else %}/web/posts/{{ item.id }}{% endif %}">
-      <a href="/web/users/{{ from_user.user_id }}" class="icon-container{% if from_mii.official %} official-user{% endif %}">
-        <img src="{{ from_mii.output }}" class="icon">
-      </a>
-      <div class="body">
-        {% if item.news_context == 2 %}
-        <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a> gave <a href="/web/posts/{{ item.id }}" class="link">your Post</a> a Yeah.
-        {% elif item.news_context == 3 %}
-        <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a> gave <a href="/web/replies/{{ item.id }}" class="link">your Comment</a> a Yeah.
-        {% elif item.news_context == 4 %}
-        <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a> commented on <a href="/web/posts/{{ item.id }}" class="link">your post</a>.
-        {% elif item.news_context == 6 %}
-        Followed by <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>.
-        {% else %}
-        Notification from {{ from_user.screen_name }}.
-        {% endif %}
-        <span class="timestamp"> {{ nc.human_time }}</span>
+  <div class="main-column">
+    <div class="post-list-outline">
+      <h2 class="headline">Updates</h2>
+
+      {% if not news_ctx %}
+      <div id="updates-no-content" class="no-content"><div>
+        <p>No updates.</p>
+      </div></div>
+      {% else %}
+      <div class="list news-list">
+        {% for nc in news_ctx %}
+        {% with news=nc.news from_user=nc.from_user from_mii=nc.from_mii %}
+        <div class="news-list-content{% if not news.has_read %} notify{% endif %} trigger"
+          tabindex="0" data-href="{{ nc.news_url|default:'#' }}">
+
+          {% if from_user and from_mii %}
+          <a href="/web/users/{{ from_user.user_id }}" class="icon-container{% if from_mii.official %} official-user{% endif %}">
+            <img src="{{ from_mii.output }}" class="icon">
+          </a>
+          {% endif %}
+
+          <div class="body">
+            {% if news.news_context == 0 or news.news_context == 1 %}
+              {# Admin/system message #}
+              <span>{{ news.message }}</span>
+
+            {% elif news.news_context == 2 %}
+              {# Yeah on post #}
+              {% if nc.merged_count >= 1 %}
+                <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>
+                and {{ nc.merged_count }} other{% if nc.merged_count != 1 %}s{% endif %}
+                gave <a href="{{ nc.news_url }}" class="link">your Post&nbsp;({{ nc.news_body }})</a> a Yeah.
+              {% else %}
+                <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>
+                gave <a href="{{ nc.news_url }}" class="link">your Post&nbsp;({{ nc.news_body }})</a> a Yeah.
+              {% endif %}
+
+            {% elif news.news_context == 3 %}
+              {# Yeah on comment #}
+              <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>
+              gave <a href="{{ nc.news_url }}" class="link">your Comment&nbsp;({{ nc.news_body }})</a> a Yeah.
+
+            {% elif news.news_context == 4 %}
+              {# Comment on your post #}
+              <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>
+              commented on <a href="{{ nc.news_url }}" class="link">your Post&nbsp;({{ nc.news_body }})</a>.
+
+            {% elif news.news_context == 5 %}
+              {# Comment on a post you also commented on #}
+              <a href="/web/users/{{ from_user.user_id }}" class="nick-name">{{ from_user.screen_name }}</a>
+              also commented on <a href="{{ nc.news_url }}" class="link">a Post&nbsp;({{ nc.news_body }})</a>.
+
+            {% elif news.news_context == 6 %}
+              {# Follow #}
+              <a href="{{ nc.news_url }}" class="nick-name">{{ from_user.screen_name }}</a> started following you.
+
+            {% else %}
+              Notification from {% if from_user %}{{ from_user.screen_name }}{% else %}someone{% endif %}.
+            {% endif %}
+
+            <span class="timestamp"> {{ news.created_at|humantiming }}</span>
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
       </div>
+      {% endif %}
+
     </div>
-    {% endwith %}
-    {% empty %}
-    <div class="no-content"><div><p>You have no notifications.</p></div></div>
-    {% endfor %}
   </div>
 </div>
 {% endblock %}
