@@ -850,3 +850,32 @@ def od_identified_user_posts_view(request):
         'me': me,
         'me_mii': get_mii(me, 0) if me else None,
     })
+
+
+def od_communities_categories_view(request, category):
+    me = get_me(request)
+    offset = int(request.GET.get('offset', 0))
+
+    # category: wiiu_all, 3ds_all, special, etc.
+    if category == '3ds_all':
+        titles_qs = Title.objects.filter(platform_id=0, hidden=False).order_by('-created_at')
+    elif category == 'special':
+        titles_qs = Title.objects.filter(platform_id__isnull=True, hidden=False).order_by('-created_at')
+    else:
+        # wiiu_all and any unknown default to WiiU (platform_id NOT NULL)
+        titles_qs = Title.objects.filter(platform_id__isnull=False, hidden=False).order_by('-created_at')
+
+    num_titles = titles_qs.count()
+    titles = list(titles_qs[offset:offset + 30])
+    next_offset = offset + 30 if len(titles) == 30 else None
+
+    return render(request, 'offdevice/communities_categories.html', {
+        'titles': titles,
+        'num_titles': num_titles,
+        'category': category,
+        'next_offset': next_offset,
+        'pagetitle': 'Communities',
+        'me': me,
+        'me_mii': get_mii(me, 0) if me else None,
+        'mnselect': 'community',
+    })

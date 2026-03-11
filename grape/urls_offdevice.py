@@ -19,6 +19,7 @@ urlpatterns = [
 
     # Communities
     path('communities', offdevice_views.od_communities_view, name='od_communities'),
+    path('communities/categories/<str:category>', offdevice_views.od_communities_categories_view, name='od_communities_categories'),
     path('titles/search', offdevice_views.od_titles_search_view, name='od_titles_search'),
     path('titles/<str:title_id>/<str:community_id>', offdevice_views.od_community_posts_view, name='od_community_posts'),
 

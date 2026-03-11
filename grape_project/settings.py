@@ -98,7 +98,7 @@ RECAPTCHA_PRIVATE_KEY = ''
 
 # Password hashers - support PHP bcrypt ($2y$) and Django bcrypt ($2b$)
 PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'grape.hashers.GrapeBcryptHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
 ]

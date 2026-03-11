@@ -787,49 +787,19 @@ def profile_settings_view(request):
     profile = get_or_create_profile(me)
 
     if request.method == 'POST':
-        comment = request.POST.get('comment', '').strip()[:1000]
+        comment = request.POST.get('comment', '').strip()[:255]
         allow_request = int(request.POST.get('allow_request', 1))
-        rel_vis = request.POST.get('relationship_visibility', '1')
-        gender = request.POST.get('gender', '3')
-        country = request.POST.get('country', '')[:50]
-        game_skill = request.POST.get('game_skill', '1')
-
-        try:
-            rel_vis = max(1, min(3, int(rel_vis)))
-        except (ValueError, TypeError):
-            rel_vis = 1
-        try:
-            gender = str(max(1, min(3, int(gender))))
-        except (ValueError, TypeError):
-            gender = '3'
-        try:
-            game_skill = str(max(0, min(2, int(game_skill))))
-        except (ValueError, TypeError):
-            game_skill = '1'
+        rel_vis = int(request.POST.get('relationship_visibility', 0))
 
         profile.comment = comment
         profile.allow_request = allow_request
         profile.relationship_visibility = rel_vis
-        profile.gender = gender
-        profile.country = country
-        profile.game_experience = game_skill
         profile.save()
 
         return redirect(f'/users/{me.user_id}')
 
-    favorite_screenshot = None
-    if profile.favorite_screenshot:
-        try:
-            from grape.models import Post
-            fp = Post.objects.get(id=profile.favorite_screenshot, is_hidden=False)
-            if fp.screenshot:
-                favorite_screenshot = fp.screenshot
-        except Exception:
-            pass
-
     return render(request, 'portal/profile_settings.html', {
         'profile': profile,
-        'favorite_screenshot': favorite_screenshot,
         'theme_css': theme_css,
         'pagetitle': 'Profile Settings',
         'me': me,

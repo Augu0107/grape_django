@@ -7,11 +7,10 @@
   <form method="post">
     {% csrf_token %}
     <div>
-      <label for="empathy_notice_opt_out">Opt out of Yeah notifications</label>
-      <select name="empathy_optout" id="empathy_notice_opt_out">
-        <option value="0" {% if not profile.empathy_optout %}selected{% endif %}>Receive</option>
-        <option value="1" {% if profile.empathy_optout %}selected{% endif %}>Don't Receive</option>
-      </select>
+      <label>
+        <input type="checkbox" name="empathy_optout" value="1" {% if profile.empathy_optout %}checked{% endif %}>
+        Opt out of Yeah notifications
+      </label>
     </div>
     <div>
       <input type="submit" class="btn_001" value="Save">

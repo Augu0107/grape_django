@@ -13,11 +13,18 @@ class GrapeBcryptHasher(BasePasswordHasher):
     Handles PHP password_hash($pass, PASSWORD_BCRYPT) output ($2y$10$...).
     Also handles $2b$ hashes.
     Stores new hashes as $2y$ to match PHP output.
+
+    NOTE: This hasher is used ONLY for Grape site users (people table).
+    Django admin users (auth_user) use PBKDF2 — keep PBKDF2 first in PASSWORD_HASHERS.
     """
     algorithm = 'grape_bcrypt'
 
     def salt(self):
         return ''  # bcrypt generates its own salt
+
+    def identify(self, encoded):
+        """Return True if this hasher should handle this encoded hash."""
+        return encoded.startswith('$2y$') or encoded.startswith('$2b$')
 
     def encode(self, password, salt):
         # Generate a new bcrypt hash, store as $2y$ like PHP
